@@ -1,5 +1,6 @@
 <h1 align="center">
   <!-- Logo -->
+  <img src="https://user-images.githubusercontent.com/4985201/64657906-4d0cc000-d3ea-11e9-93ba-a46c008f2b22.png" height="118"/>
   <br/>
   @marko/rollup
 	<br/>
