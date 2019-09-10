@@ -1,0 +1,68 @@
+{
+  "name": "@marko/rollup",
+  "description": "A Marko plugin for Rollup",
+  "version": "1.0.0",
+  "author": "Dylan Piercey <dpiercey@ebay.com>",
+  "bugs": "https://github.com/marko-js/rollup/issues",
+  "devDependencies": {
+    "@commitlint/cli": "^8.1.0",
+    "@commitlint/config-conventional": "^8.1.0",
+    "@types/jest": "^24.0.18",
+    "@types/mz": "0.0.32",
+    "@types/node": "^12.7.3",
+    "coveralls": "^3.0.6",
+    "escape-string-regexp": "^2.0.0",
+    "husky": "^3.0.5",
+    "jest": "^24.9.0",
+    "lint-staged": "^9.2.5",
+    "marko": "^4.18.13",
+    "mz": "^2.7.0",
+    "prettier": "^1.18.2",
+    "rollup": "^1.20.3",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-postcss": "^2.0.3",
+    "standard-version": "^7.0.0",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.19.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.6.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "homepage": "https://github.com/marko-js/rollup",
+  "keywords": [
+    "rollup",
+    "marko",
+    "plugin",
+    "loader",
+    "transform"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marko-js/rollup"
+  },
+  "peerDependencies": {
+    "marko": "^4",
+    "rollup": "^1",
+    "rollup-plugin-commonjs": "^10"
+  },
+  "scripts": {
+    "build": "tsc",
+    "ci:report": "cat coverage/lcov.info | coveralls",
+    "ci:test": "jest --ci --coverage",
+    "format": "prettier \"**/*.{json,md,js,ts}\" --write",
+    "lint": "tsc --noEmit && tslint -t codeFrame -c tslint.json 'src/**/*.ts'",
+    "prepublishOnly": "npm run build",
+    "release": "standard-version",
+    "test": "jest -o",
+    "test:watch": "jest -o --watch"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "rollup-pluginutils": "^2.8.1"
+  }
+}
