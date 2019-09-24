@@ -15951,7 +15951,7 @@ marko_template.Component = marko_defineComponent(marko_component, marko_template
 
 var componentsBrowser = indexBrowser$1;
 
-componentsBrowser.init(window.SOME_COMPONENTS);
+componentsBrowser.init(\\"SOME_COMPONENTS\\");
 
 // index.css
 div { color: green }"

@@ -33,9 +33,10 @@ const plugin: PluginImpl<{
   include?: Parameters<typeof createFilter>[0];
   exclude?: Parameters<typeof createFilter>[1];
   hydrate?: boolean;
-  initComponents?: string | boolean;
+  runtimeId?: string;
+  initComponents?: boolean;
 }> = (options = {}) => {
-  const { hydrate = false, initComponents = true } = options;
+  const { hydrate = false, initComponents = true, runtimeId } = options;
   const filter = createFilter(options.include, options.exclude);
   const compiler = require(options.compiler || DEFAULT_COMPILER);
   const virtualFiles: Map<string, string> = new Map();
@@ -116,7 +117,7 @@ const plugin: PluginImpl<{
           importStr(DEPS_PREFIX + id),
           importStr("marko/components", "__rollup_marko_runtime__"),
           `__rollup_marko_runtime__.init(${
-            typeof initComponents === "string" ? initComponents : ""
+            runtimeId ? JSON.stringify(runtimeId) : ""
           })`
         ].join(";");
       }
@@ -174,7 +175,7 @@ const plugin: PluginImpl<{
       } else {
         // TODO: remove once Marko 5 is out with esmodule support.
         // When we have external dependencies we need to load them as commonjs imports
-        // or things blow up. This hack uses the commonjs plugin to convert the Marko ouput
+        // or things blow up. This hack uses the commonjs plugin to convert the Marko output
         // code to an esmodule before we concat it :shrug:.
         const esModule = transformCommonJS!.call(this, code, id);
 

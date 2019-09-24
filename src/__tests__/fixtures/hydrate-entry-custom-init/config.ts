@@ -7,7 +7,7 @@ export default {
   plugins: [
     marko({
       hydrate: true,
-      initComponents: "window.SOME_COMPONENTS"
+      runtimeId: "SOME_COMPONENTS"
     }),
     nodeResolve({
       browser: true,

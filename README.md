@@ -98,9 +98,9 @@ Include Rollup's output assets on the page with the server-rendered html and the
 ## Advanced usage
 
 ### Multiple copies of Marko
-In some cases you may want to embed multiple isolated copies of Marko on the page. Since Marko relies on some `window` properties to initialize this can cause issues. By default Marko will read the server rendered hydration code from `window.$components`.
+In some cases you may want to embed multiple isolated copies of Marko on the page. Since Marko relies on some `window` properties to initialize this can cause issues. For example, by default Marko will read the server rendered hydration code from `window.$components`. In Marko you can change these `window` properties by rendering with `{ $global: { runtimeId: "MY_MARKO_RUNTIME_ID" } }` as input on the server side.
 
-This plugin exposes an `initComponents` option which allows you to provide your own JavaScript expression to evaluate when initializing the components.
+This plugin exposes a `runtimeId` option produces output which will automatically initialize with the same `runtimeId` you used on the server side.
 
 ```js
 export default {
@@ -108,7 +108,7 @@ export default {
   plugins: [
     marko({
       hydrate: true,
-      initComponents: "window.MY_APP_MARKO_COMPONENTS"
+      runtimeId: "MY_MARKO_RUNTIME_ID" // you should also provide `{ $global: { runtimeId: "MY_MARKO_RUNTIME_ID" } }` when rendering your template on the server.
     }),
     ...
   ],
@@ -116,7 +116,7 @@ export default {
 }
 ```
 
-You can also set `initComponents` to `false` if you wish to manually call `require("marko.components").init(...)`.
+You can also set the `initComponents` to `false` if you wish to manually call `require("marko.components").init(...)`.
 
 ## Code of Conduct
 
