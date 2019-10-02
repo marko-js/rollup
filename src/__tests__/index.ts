@@ -25,6 +25,7 @@ fs.readdirSync(FIXTURES).forEach(fixture => {
             `// ${fileName}\n${code.toString("utf-8")}`
         )
         .join("\n")
+        .replace(/@marko\/rollup\$\d\.\d\.\d/g, "@marko/rollup$latest")
     );
   });
 });

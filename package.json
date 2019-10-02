@@ -5,28 +5,27 @@
   "author": "Dylan Piercey <dpiercey@ebay.com>",
   "bugs": "https://github.com/marko-js/rollup/issues",
   "devDependencies": {
-    "@commitlint/cli": "^8.1.0",
-    "@commitlint/config-conventional": "^8.1.0",
+    "@commitlint/cli": "^8.2.0",
+    "@commitlint/config-conventional": "^8.2.0",
     "@types/jest": "^24.0.18",
     "@types/mz": "0.0.32",
-    "@types/node": "^12.7.3",
+    "@types/node": "^12.7.8",
     "coveralls": "^3.0.6",
     "escape-string-regexp": "^2.0.0",
-    "husky": "^3.0.5",
+    "husky": "^3.0.7",
     "jest": "^24.9.0",
-    "lint-staged": "^9.2.5",
+    "lint-staged": "^9.4.1",
     "marko": "^4.18.13",
-    "mz": "^2.7.0",
     "prettier": "^1.18.2",
     "rollup": "^1.20.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-postcss": "^2.0.3",
     "standard-version": "^7.0.0",
-    "ts-jest": "^24.0.2",
-    "tslint": "^5.19.0",
+    "ts-jest": "^24.1.0",
+    "tslint": "^5.20.0",
     "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.6.2"
+    "typescript": "^3.6.3"
   },
   "files": [
     "dist"
@@ -63,6 +62,8 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "rollup-pluginutils": "^2.8.1"
+    "mz": "^2.7.0",
+    "rollup-pluginutils": "^2.8.2",
+    "tslib": "^1.10.0"
   }
 }

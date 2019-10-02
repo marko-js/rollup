@@ -461,7 +461,7 @@ function convertAttrValue(type, value) {
     if (value === true) {
         return \\"\\";
     } else if (type == \\"object\\") {
-        return JSON.stringify(value);
+        return value instanceof RegExp ? value.source : JSON.stringify(value);
     } else {
         return toString(value);
     }
@@ -4927,8 +4927,12 @@ function initClientRendered(componentDefs, doc) {
  * of the component IDs.
  */
 function initServerRendered(renderedComponents, doc) {
-    if (!renderedComponents) {
-        renderedComponents = win$2.$components;
+    var type = typeof renderedComponents;
+    var runtimeId;
+
+    if (type !== \\"object\\") {
+        var componentsKey = \\"$\\" + (type === \\"string\\" ? renderedComponents + \\"_components\\" : \\"components\\");
+        renderedComponents = win$2[componentsKey];
 
         if (renderedComponents && renderedComponents.forEach) {
             renderedComponents.forEach(function (renderedComponent) {
@@ -4936,7 +4940,7 @@ function initServerRendered(renderedComponents, doc) {
             });
         }
 
-        win$2.$components = {
+        win$2[componentsKey] = {
             concat: initServerRendered
         };
 
@@ -4947,19 +4951,20 @@ function initServerRendered(renderedComponents, doc) {
 
     renderedComponents = finalize$1(renderedComponents);
 
+    runtimeId = renderedComponents.r;
     var componentDefs = renderedComponents.w;
     var typesArray = renderedComponents.t;
-    var runtimeId = renderedComponents.r;
+    var markoGlobalsKey = \\"$\\" + runtimeId + \\"G\\";
 
     // Ensure that event handlers to handle delegating events are
     // always attached before initializing any components
     indexServerComponentBoundaries(doc, runtimeId);
     eventDelegation.ad_(doc);
 
-    var globals = window.$MG;
+    var globals = win$2[markoGlobalsKey];
     if (globals) {
         serverRenderedGlobals = finalize$1(globals);
-        delete window.$MG;
+        delete win$2[markoGlobalsKey];
     }
 
     // hydrate components top down (leaf nodes last)
@@ -5255,7 +5260,7 @@ var marko_template = module.exports = vdom$2.t(),
         }
       },
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/entry-no-hydrate/src/components/class-component.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/entry-no-hydrate/src/components/class-component.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -5285,7 +5290,7 @@ var implicitComponent = createCommonjsModule(function (module) {
 
 var marko_template = module.exports = vdom$2.t(),
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/entry-no-hydrate/src/components/implicit-component.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/entry-no-hydrate/src/components/implicit-component.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -5317,7 +5322,7 @@ var src$1 = createCommonjsModule(function (module) {
 
 var marko_template = module.exports = vdom$2.t(),
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/entry-no-hydrate/src/index.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/entry-no-hydrate/src/index.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -5812,7 +5817,7 @@ function convertAttrValue(type, value) {
     if (value === true) {
         return \\"\\";
     } else if (type == \\"object\\") {
-        return JSON.stringify(value);
+        return value instanceof RegExp ? value.source : JSON.stringify(value);
     } else {
         return toString(value);
     }
@@ -10278,8 +10283,12 @@ function initClientRendered(componentDefs, doc) {
  * of the component IDs.
  */
 function initServerRendered(renderedComponents, doc) {
-    if (!renderedComponents) {
-        renderedComponents = win$2.$components;
+    var type = typeof renderedComponents;
+    var runtimeId;
+
+    if (type !== \\"object\\") {
+        var componentsKey = \\"$\\" + (type === \\"string\\" ? renderedComponents + \\"_components\\" : \\"components\\");
+        renderedComponents = win$2[componentsKey];
 
         if (renderedComponents && renderedComponents.forEach) {
             renderedComponents.forEach(function (renderedComponent) {
@@ -10287,7 +10296,7 @@ function initServerRendered(renderedComponents, doc) {
             });
         }
 
-        win$2.$components = {
+        win$2[componentsKey] = {
             concat: initServerRendered
         };
 
@@ -10298,19 +10307,20 @@ function initServerRendered(renderedComponents, doc) {
 
     renderedComponents = finalize$1(renderedComponents);
 
+    runtimeId = renderedComponents.r;
     var componentDefs = renderedComponents.w;
     var typesArray = renderedComponents.t;
-    var runtimeId = renderedComponents.r;
+    var markoGlobalsKey = \\"$\\" + runtimeId + \\"G\\";
 
     // Ensure that event handlers to handle delegating events are
     // always attached before initializing any components
     indexServerComponentBoundaries(doc, runtimeId);
     eventDelegation.ad_(doc);
 
-    var globals = window.$MG;
+    var globals = win$2[markoGlobalsKey];
     if (globals) {
         serverRenderedGlobals = finalize$1(globals);
-        delete window.$MG;
+        delete win$2[markoGlobalsKey];
     }
 
     // hydrate components top down (leaf nodes last)
@@ -10620,7 +10630,7 @@ var marko_template = module.exports = vdom$2.t(),
         }
       },
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/hydrate-entry/src/components/class-component.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/hydrate-entry/src/components/class-component.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -11115,7 +11125,7 @@ function convertAttrValue(type, value) {
     if (value === true) {
         return \\"\\";
     } else if (type == \\"object\\") {
-        return JSON.stringify(value);
+        return value instanceof RegExp ? value.source : JSON.stringify(value);
     } else {
         return toString(value);
     }
@@ -15581,8 +15591,12 @@ function initClientRendered(componentDefs, doc) {
  * of the component IDs.
  */
 function initServerRendered(renderedComponents, doc) {
-    if (!renderedComponents) {
-        renderedComponents = win$2.$components;
+    var type = typeof renderedComponents;
+    var runtimeId;
+
+    if (type !== \\"object\\") {
+        var componentsKey = \\"$\\" + (type === \\"string\\" ? renderedComponents + \\"_components\\" : \\"components\\");
+        renderedComponents = win$2[componentsKey];
 
         if (renderedComponents && renderedComponents.forEach) {
             renderedComponents.forEach(function (renderedComponent) {
@@ -15590,7 +15604,7 @@ function initServerRendered(renderedComponents, doc) {
             });
         }
 
-        win$2.$components = {
+        win$2[componentsKey] = {
             concat: initServerRendered
         };
 
@@ -15601,19 +15615,20 @@ function initServerRendered(renderedComponents, doc) {
 
     renderedComponents = finalize$1(renderedComponents);
 
+    runtimeId = renderedComponents.r;
     var componentDefs = renderedComponents.w;
     var typesArray = renderedComponents.t;
-    var runtimeId = renderedComponents.r;
+    var markoGlobalsKey = \\"$\\" + runtimeId + \\"G\\";
 
     // Ensure that event handlers to handle delegating events are
     // always attached before initializing any components
     indexServerComponentBoundaries(doc, runtimeId);
     eventDelegation.ad_(doc);
 
-    var globals = window.$MG;
+    var globals = win$2[markoGlobalsKey];
     if (globals) {
         serverRenderedGlobals = finalize$1(globals);
-        delete window.$MG;
+        delete win$2[markoGlobalsKey];
     }
 
     // hydrate components top down (leaf nodes last)
@@ -15923,7 +15938,7 @@ var marko_template = module.exports = vdom$2.t(),
         }
       },
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/hydrate-entry-custom-init/src/components/class-component.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/hydrate-entry-custom-init/src/components/class-component.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -16418,7 +16433,7 @@ function convertAttrValue(type, value) {
     if (value === true) {
         return \\"\\";
     } else if (type == \\"object\\") {
-        return JSON.stringify(value);
+        return value instanceof RegExp ? value.source : JSON.stringify(value);
     } else {
         return toString(value);
     }
@@ -20884,8 +20899,12 @@ function initClientRendered(componentDefs, doc) {
  * of the component IDs.
  */
 function initServerRendered(renderedComponents, doc) {
-    if (!renderedComponents) {
-        renderedComponents = win$2.$components;
+    var type = typeof renderedComponents;
+    var runtimeId;
+
+    if (type !== \\"object\\") {
+        var componentsKey = \\"$\\" + (type === \\"string\\" ? renderedComponents + \\"_components\\" : \\"components\\");
+        renderedComponents = win$2[componentsKey];
 
         if (renderedComponents && renderedComponents.forEach) {
             renderedComponents.forEach(function (renderedComponent) {
@@ -20893,7 +20912,7 @@ function initServerRendered(renderedComponents, doc) {
             });
         }
 
-        win$2.$components = {
+        win$2[componentsKey] = {
             concat: initServerRendered
         };
 
@@ -20904,19 +20923,20 @@ function initServerRendered(renderedComponents, doc) {
 
     renderedComponents = finalize$1(renderedComponents);
 
+    runtimeId = renderedComponents.r;
     var componentDefs = renderedComponents.w;
     var typesArray = renderedComponents.t;
-    var runtimeId = renderedComponents.r;
+    var markoGlobalsKey = \\"$\\" + runtimeId + \\"G\\";
 
     // Ensure that event handlers to handle delegating events are
     // always attached before initializing any components
     indexServerComponentBoundaries(doc, runtimeId);
     eventDelegation.ad_(doc);
 
-    var globals = window.$MG;
+    var globals = win$2[markoGlobalsKey];
     if (globals) {
         serverRenderedGlobals = finalize$1(globals);
-        delete window.$MG;
+        delete win$2[markoGlobalsKey];
     }
 
     // hydrate components top down (leaf nodes last)
@@ -21212,7 +21232,7 @@ var marko_template = module.exports = vdom$2.t(),
         }
       },
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/hydrate-entry-skip-init/src/components/class-component.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/hydrate-entry-skip-init/src/components/class-component.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -23208,7 +23228,7 @@ function convertAttrValue(type, value) {
     if (value === true) {
         return \\"\\";
     } else if (type == \\"object\\") {
-        return JSON.stringify(value);
+        return value instanceof RegExp ? value.source : JSON.stringify(value);
     } else {
         return toString(value);
     }
@@ -25197,8 +25217,12 @@ function initClientRendered(componentDefs, doc) {
  * of the component IDs.
  */
 function initServerRendered(renderedComponents, doc) {
-    if (!renderedComponents) {
-        renderedComponents = win$2.$components;
+    var type = typeof renderedComponents;
+    var runtimeId;
+
+    if (type !== \\"object\\") {
+        var componentsKey = \\"$\\" + (type === \\"string\\" ? renderedComponents + \\"_components\\" : \\"components\\");
+        renderedComponents = win$2[componentsKey];
 
         if (renderedComponents && renderedComponents.forEach) {
             renderedComponents.forEach(function (renderedComponent) {
@@ -25206,7 +25230,7 @@ function initServerRendered(renderedComponents, doc) {
             });
         }
 
-        win$2.$components = {
+        win$2[componentsKey] = {
             concat: initServerRendered
         };
 
@@ -25217,19 +25241,20 @@ function initServerRendered(renderedComponents, doc) {
 
     renderedComponents = finalize$1(renderedComponents);
 
+    runtimeId = renderedComponents.r;
     var componentDefs = renderedComponents.w;
     var typesArray = renderedComponents.t;
-    var runtimeId = renderedComponents.r;
+    var markoGlobalsKey = \\"$\\" + runtimeId + \\"G\\";
 
     // Ensure that event handlers to handle delegating events are
     // always attached before initializing any components
     indexServerComponentBoundaries(doc, runtimeId);
     eventDelegation.ad_(doc);
 
-    var globals = window.$MG;
+    var globals = win$2[markoGlobalsKey];
     if (globals) {
         serverRenderedGlobals = finalize$1(globals);
-        delete window.$MG;
+        delete win$2[markoGlobalsKey];
     }
 
     // hydrate components top down (leaf nodes last)
@@ -25336,7 +25361,7 @@ var __rollup_marko_component__ = {
   }
 };
 
-componentsBrowser.register(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/hydrate-split-component/src/components/split-component.component-browser\\",__rollup_marko_component__);
+componentsBrowser.register(\\"/@marko/rollup$latest/src/__tests__/fixtures/hydrate-split-component/src/components/split-component.component-browser\\",__rollup_marko_component__);
 
 componentsBrowser.init();
 
@@ -25805,7 +25830,7 @@ function convertAttrValue(type, value) {
     if (value === true) {
         return \\"\\";
     } else if (type == \\"object\\") {
-        return JSON.stringify(value);
+        return value instanceof RegExp ? value.source : JSON.stringify(value);
     } else {
         return toString(value);
     }
@@ -30271,8 +30296,12 @@ function initClientRendered(componentDefs, doc) {
  * of the component IDs.
  */
 function initServerRendered(renderedComponents, doc) {
-    if (!renderedComponents) {
-        renderedComponents = win$2.$components;
+    var type = typeof renderedComponents;
+    var runtimeId;
+
+    if (type !== \\"object\\") {
+        var componentsKey = \\"$\\" + (type === \\"string\\" ? renderedComponents + \\"_components\\" : \\"components\\");
+        renderedComponents = win$2[componentsKey];
 
         if (renderedComponents && renderedComponents.forEach) {
             renderedComponents.forEach(function (renderedComponent) {
@@ -30280,7 +30309,7 @@ function initServerRendered(renderedComponents, doc) {
             });
         }
 
-        win$2.$components = {
+        win$2[componentsKey] = {
             concat: initServerRendered
         };
 
@@ -30291,19 +30320,20 @@ function initServerRendered(renderedComponents, doc) {
 
     renderedComponents = finalize$1(renderedComponents);
 
+    runtimeId = renderedComponents.r;
     var componentDefs = renderedComponents.w;
     var typesArray = renderedComponents.t;
-    var runtimeId = renderedComponents.r;
+    var markoGlobalsKey = \\"$\\" + runtimeId + \\"G\\";
 
     // Ensure that event handlers to handle delegating events are
     // always attached before initializing any components
     indexServerComponentBoundaries(doc, runtimeId);
     eventDelegation.ad_(doc);
 
-    var globals = window.$MG;
+    var globals = win$2[markoGlobalsKey];
     if (globals) {
         serverRenderedGlobals = finalize$1(globals);
-        delete window.$MG;
+        delete win$2[markoGlobalsKey];
     }
 
     // hydrate components top down (leaf nodes last)
@@ -30599,7 +30629,7 @@ var marko_template = module.exports = vdom$2.t(),
         }
       },
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/manual-render/src/components/class-component.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/manual-render/src/components/class-component.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -30629,7 +30659,7 @@ var implicitComponent = createCommonjsModule(function (module) {
 
 var marko_template = module.exports = vdom$2.t(),
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/manual-render/src/components/implicit-component.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/manual-render/src/components/implicit-component.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
@@ -30661,7 +30691,7 @@ var template = createCommonjsModule(function (module) {
 
 var marko_template = module.exports = vdom$2.t(),
     marko_registerComponent = helpersBrowser.rc,
-    marko_componentType = marko_registerComponent(\\"/@marko/rollup$1.0.0/src/__tests__/fixtures/manual-render/src/template.marko\\", function() {
+    marko_componentType = marko_registerComponent(\\"/@marko/rollup$latest/src/__tests__/fixtures/manual-render/src/template.marko\\", function() {
       return module.exports;
     }),
     marko_renderer = helpersBrowser.r,
