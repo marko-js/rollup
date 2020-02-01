@@ -4,6 +4,7 @@ import marko from "../../../index";
 
 export default {
   input: "src/index.marko",
+  external: (id: string) => /^marko\//.test(id),
   plugins: [
     marko(),
     nodeResolve({
