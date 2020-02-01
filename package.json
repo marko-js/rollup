@@ -1,7 +1,7 @@
 {
   "name": "@marko/rollup",
   "description": "A Marko plugin for Rollup",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": "Dylan Piercey <dpiercey@ebay.com>",
   "bugs": "https://github.com/marko-js/rollup/issues",
   "devDependencies": {
