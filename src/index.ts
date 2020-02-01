@@ -4,6 +4,7 @@ import { PluginImpl } from "rollup";
 import commonJSPlugin from "rollup-plugin-commonjs";
 import { createFilter } from "rollup-pluginutils";
 
+const isMarkoRuntime = /\/marko\/(src|dist)\/runtime\//;
 const { transform: transformCommonJS } = commonJSPlugin({
   include: ["**/*.marko"],
   extensions: [".marko"],
@@ -44,6 +45,22 @@ const plugin: PluginImpl<{
 
   return {
     name: "marko",
+    options(inputOptions) {
+      const { onwarn } = inputOptions;
+      inputOptions.onwarn = (warning, warn) => {
+        if (
+          warning.code === "CIRCULAR_DEPENDENCY" &&
+          warning.importer &&
+          isMarkoRuntime.test(warning.importer)
+        ) {
+          return;
+        }
+
+        onwarn!(warning, warn);
+      };
+
+      return inputOptions;
+    },
     async resolveId(importee, importer) {
       if (importer) {
         const importerPrefixMatch = PREFIX_REG.exec(importer);
