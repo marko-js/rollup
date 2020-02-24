@@ -39,6 +39,7 @@ const plugin: PluginImpl<{
 }> = (options = {}) => {
   const { hydrate = false, initComponents = true, runtimeId } = options;
   const filter = createFilter(options.include, options.exclude);
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const compiler = require(options.compiler || DEFAULT_COMPILER);
   const virtualFiles: Map<string, string> = new Map();
   const compiledTemplates: Map<string, CompilationResult> = new Map();

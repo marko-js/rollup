@@ -63,7 +63,7 @@
     "ci:report": "cat coverage/lcov.info | coveralls",
     "ci:test": "jest --ci --coverage",
     "format": "prettier \"**/*.{json,md,js,ts}\" --write",
-    "lint": "tsc --noEmit && eslint -f codeframe ./src/**/*.ts",
+    "lint": "tsc --noEmit && eslint -f codeframe './src/**/*.ts'",
     "prepublishOnly": "npm run build",
     "release": "standard-version",
     "test": "jest --watch",
