@@ -4,7 +4,7 @@ import marko from "../../../index";
 
 export default {
   input: "src/index.marko",
-  external: (id: string) => /^marko\//.test(id),
+  external: (id: string) => id.startsWith("marko/"),
   plugins: [
     marko(),
     nodeResolve({
@@ -16,7 +16,3 @@ export default {
     })
   ]
 };
-
-export function snapshot(code: string) {
-  expect(code).toMatchSnapshot();
-}

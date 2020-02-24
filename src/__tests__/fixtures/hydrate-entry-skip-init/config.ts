@@ -3,7 +3,7 @@ import commonjs from "rollup-plugin-commonjs";
 import marko from "../../../index";
 
 export default {
-  external: (id: string) => /^marko\//.test(id),
+  external: (id: string) => id.startsWith("marko/"),
   input: "src/index.marko",
   plugins: [
     marko({
@@ -19,7 +19,3 @@ export default {
     })
   ]
 };
-
-export function snapshot(code: string) {
-  expect(code).toMatchSnapshot();
-}

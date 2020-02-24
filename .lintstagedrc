@@ -1,4 +1,4 @@
 {
-  "*.ts": ["prettier --write", "tslint -t codeFrame -c tslint.json"],
+  "*.ts": ["eslint -f codeframe --fix", "prettier --write"],
   "*.{js,json,md}": ["prettier --write"]
 }
