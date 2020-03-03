@@ -8,7 +8,7 @@ var renderer = _interopDefault(require('marko/dist/runtime/components/renderer')
 var defineComponent = _interopDefault(require('marko/dist/runtime/components/defineComponent'));
 var vElement = _interopDefault(require('marko/dist/runtime/vdom/helpers/v-element'));
 var _const = _interopDefault(require('marko/dist/runtime/vdom/helpers/const'));
-var __rollup_marko_runtime__ = _interopDefault(require('marko/components'));
+var components = require('marko/components');
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -45,4 +45,4 @@ marko_template._ = renderer(render, {
 marko_template.Component = defineComponent(marko_component, marko_template._);
 });
 
-__rollup_marko_runtime__.init("SOME_COMPONENTS");
+components.init("SOME_COMPONENTS");

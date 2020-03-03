@@ -133,10 +133,8 @@ const plugin: PluginImpl<{
       if (isHydrate) {
         return [
           importStr(DEPS_PREFIX + id),
-          importStr("marko/components", "__rollup_marko_runtime__"),
-          `__rollup_marko_runtime__.init(${
-            runtimeId ? JSON.stringify(runtimeId) : ""
-          })`
+          importStr("marko/components", "{ init }"),
+          `init(${runtimeId ? JSON.stringify(runtimeId) : ""})`
         ].join(";");
       }
 
@@ -144,7 +142,8 @@ const plugin: PluginImpl<{
 
       if (!compiled) {
         compiled = compiler.compileForBrowser(source, id, {
-          writeToDisk: false
+          writeToDisk: false,
+          writeVersionComment: false
         }) as CompilationResult;
 
         compiledTemplates.set(id, compiled);
@@ -172,11 +171,9 @@ const plugin: PluginImpl<{
           if (SPLIT_COMPONENT_REG.test(meta.component)) {
             // Split components (component-browser.js) do not register themselves, so we inline code to do this manually.
             deps.push(
-              importStr("marko/components", "__rollup_marko_runtime__"),
-              importStr(meta.component, "__rollup_marko_component__"),
-              `__rollup_marko_runtime__.register(${JSON.stringify(
-                meta.id
-              )},__rollup_marko_component__)`
+              importStr("marko/components", "{ register }"),
+              importStr(meta.component, "component"),
+              `register(${JSON.stringify(meta.id)}, component)`
             );
           } else {
             deps.push(importStr(meta.component));
