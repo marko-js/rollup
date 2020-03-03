@@ -3,6 +3,7 @@ import path from "path";
 import { PluginImpl } from "rollup";
 import commonJSPlugin from "rollup-plugin-commonjs";
 import { createFilter } from "rollup-pluginutils";
+import ConcatMap from "concat-with-sourcemaps";
 
 const isMarkoRuntime = /\/marko\/(src|dist)\/runtime\//;
 const { transform: transformCommonJS } = commonJSPlugin({
@@ -13,6 +14,7 @@ const { transform: transformCommonJS } = commonJSPlugin({
 
 interface CompilationResult {
   code: string;
+  map: unknown;
   meta: {
     id: string;
     component?: string;
@@ -36,6 +38,7 @@ const plugin: PluginImpl<{
   hydrate?: boolean;
   runtimeId?: string;
   initComponents?: boolean;
+  babelConfig?: any;
 }> = (options = {}) => {
   const { hydrate = false, initComponents = true, runtimeId } = options;
   const filter = createFilter(options.include, options.exclude);
@@ -43,6 +46,23 @@ const plugin: PluginImpl<{
   const compiler = require(options.compiler || DEFAULT_COMPILER);
   const virtualFiles: Map<string, string> = new Map();
   const compiledTemplates: Map<string, CompilationResult> = new Map();
+  const babelConfig = Object.assign({}, options.babelConfig);
+  babelConfig.caller = Object.assign(
+    {
+      name: "@marko/rollup",
+      supportsStaticESM: true,
+      supportsDynamicImport: true,
+      supportsTopLevelAwait: true
+    },
+    babelConfig.caller
+  );
+
+  const markoConfig = {
+    writeToDisk: false,
+    writeVersionComment: false,
+    sourceMaps: true,
+    babelConfig
+  };
 
   return {
     name: "marko",
@@ -133,23 +153,23 @@ const plugin: PluginImpl<{
       if (isHydrate) {
         return [
           importStr(DEPS_PREFIX + id),
-          importStr("marko/components", "{ init }"),
-          `init(${runtimeId ? JSON.stringify(runtimeId) : ""})`
+          importStr("marko/components", "components"),
+          `components.init(${runtimeId ? JSON.stringify(runtimeId) : ""})`
         ].join(";");
       }
 
       let compiled = compiledTemplates.get(id);
 
       if (!compiled) {
-        compiled = compiler.compileForBrowser(source, id, {
-          writeToDisk: false,
-          writeVersionComment: false
-        }) as CompilationResult;
-
+        compiled = compiler.compileForBrowser(
+          source,
+          id,
+          markoConfig
+        ) as CompilationResult;
         compiledTemplates.set(id, compiled);
       }
 
-      const { code, meta } = compiled;
+      const { code, meta, map } = compiled;
       const deps: string[] = [];
 
       if (meta.deps) {
@@ -171,9 +191,9 @@ const plugin: PluginImpl<{
           if (SPLIT_COMPONENT_REG.test(meta.component)) {
             // Split components (component-browser.js) do not register themselves, so we inline code to do this manually.
             deps.push(
-              importStr("marko/components", "{ register }"),
+              importStr("marko/components", "components"),
               importStr(meta.component, "component"),
-              `register(${JSON.stringify(meta.id)}, component)`
+              `components.register(${JSON.stringify(meta.id)}, component)`
             );
           } else {
             deps.push(importStr(meta.component));
@@ -188,16 +208,25 @@ const plugin: PluginImpl<{
           }
         }
       } else {
-        // TODO: remove once Marko 5 is out with esmodule support.
-        // When we have external dependencies we need to load them as commonjs imports
-        // or things blow up. This hack uses the commonjs plugin to convert the Marko output
-        // code to an esmodule before we concat it :shrug:.
-        const esModule = transformCommonJS!.call(this, code, id);
+        if (isMarko4Compiler(compiler)) {
+          // When compiling with Marko 4 and we have external dependencies we need to load them as commonjs imports
+          // or things blow up. This hack uses the commonjs plugin to convert the Marko output
+          // code to an esmodule before we concat it :shrug:.
+          const esModule = transformCommonJS!.call(this, code, id);
 
-        if (esModule) {
-          deps.push(esModule.code);
+          if (esModule) {
+            deps.push(esModule.code);
+          } else {
+            return null;
+          }
         } else {
-          return null;
+          const concat = new ConcatMap(true, "", ";");
+          concat.add(null, deps.join(";"));
+          concat.add(id, code, map as Parameters<typeof concat.add>[2]);
+          return {
+            code: concat.content.toString(),
+            sourcemap: concat.sourceMap
+          };
         }
       }
 
@@ -215,6 +244,10 @@ const plugin: PluginImpl<{
 
 function isMarkoFile(file: string) {
   return path.extname(file) === ".marko";
+}
+
+function isMarko4Compiler(compiler) {
+  return Boolean(compiler.builder);
 }
 
 function importStr(request: string, as?: string) {

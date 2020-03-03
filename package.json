@@ -5,6 +5,7 @@
   "author": "Dylan Piercey <dpiercey@ebay.com>",
   "bugs": "https://github.com/marko-js/rollup/issues",
   "dependencies": {
+    "concat-with-sourcemaps": "^1.1.0",
     "mz": "^2.7.0",
     "rollup-pluginutils": "^2.8.2",
     "tslib": "^1.11.0"

@@ -96,6 +96,27 @@ export default {
 
 Include Rollup's output assets on the page with the server-rendered html and the components will be automatically initialized (you don't need to call `template.render` yourself in the browser).
 
+## Babel options (Marko 5+)
+
+If you are using Marko 5 with this plugin you can manually override the Babel configuration used by passing a `babelConfig` object to the `@marko/rollup` plugin. By default Babels regular [config file resolution](https://babeljs.io/docs/en/config-files) will be used.
+
+```javascript
+export default {
+  input: "./my-marko-page.marko",
+  plugins: [
+    marko({
+      babelConfig: {
+        presets: ["@babel/preset-env"]
+      }
+    }),
+    ...
+  ],
+  ...
+}
+```
+
+It is recommended to use [`@babel/plugin-transform-runtime`](https://babeljs.io/docs/en/babel-plugin-transform-runtime) to avoid duplicating helpers added from Babel. To share the runtime with [`rollup-plugin-babel`](https://github.com/rollup/rollup-plugin-babel) be sure to use the [`runtimeHelpers: true` option](https://github.com/rollup/rollup-plugin-babel#helpers).
+
 ## Advanced usage
 
 ### Multiple copies of Marko
