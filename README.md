@@ -40,7 +40,7 @@ A Marko plugin for Rollup.
 3. Can calculate browser dependencies for a page template and send only templates with components to the browser.
 4. Can output a bundle which automatically initializes Marko components.
 
-**Note: The Marko 4 compiler outputs commonjs modules by default, this means the `rollup-plugin-commonjs` is required!**
+**Note: The Marko runtime is authored in commonjs, this means the `@rollup/plugin-commonjs` is required!**
 
 # Installation
 
@@ -51,8 +51,8 @@ npm install @marko/rollup
 # Example Rollup config
 
 ```javascript
-import nodeResolve from "rollup-plugin-node-resolve";
-import commonjs from "rollup-plugin-commonjs";
+import nodeResolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 import marko from "@marko/rollup";
 
 export default {

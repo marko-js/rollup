@@ -1,7 +1,7 @@
 import fs from "mz/fs";
 import path from "path";
 import { PluginImpl } from "rollup";
-import commonJSPlugin from "rollup-plugin-commonjs";
+import commonJSPlugin from "@rollup/plugin-commonjs";
 import { createFilter } from "rollup-pluginutils";
 import ConcatMap from "concat-with-sourcemaps";
 
