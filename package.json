@@ -65,7 +65,7 @@
     "format": "prettier \"**/*.{json,md,js,ts}\" --write",
     "lint": "tsc --noEmit && eslint -f codeframe './src/**/*.ts'",
     "prepublishOnly": "npm run build",
-    "release": "standard-version",
+    "release": "standard-version && git push --follow-tags origin master && npm publish",
     "test": "jest --watch",
     "test:inspect": "node --inspect $(which jest) --watch --runInBand"
   },
