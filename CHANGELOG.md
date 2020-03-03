@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/marko-js/rollup/compare/v2.0.3...v2.1.0) (2020-03-03)
+
+
+### Features
+
+* marko 5 compiler support ([3d2184b](https://github.com/marko-js/rollup/commit/3d2184bf2f42c78fd4fb8c07e5d88f4a1a3e983f))
+
 ### [2.0.3](https://github.com/marko-js/rollup/compare/v2.0.2...v2.0.3) (2020-03-03)
 
 
