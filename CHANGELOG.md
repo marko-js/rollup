@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.3](https://github.com/marko-js/rollup/compare/v2.0.2...v2.0.3) (2020-03-03)
+
+
+### Bug Fixes
+
+* run lint on all files ([52969eb](https://github.com/marko-js/rollup/commit/52969eb92c77dba791e15bbd98feb2f2c43ddad1))
+* use specifiers where possible on inserted imports ([83cea9d](https://github.com/marko-js/rollup/commit/83cea9d1ca7d082eadafd66f0f0d14639376db6b))
+
 ### [2.0.2](https://github.com/marko-js/rollup/compare/v2.0.1...v2.0.2) (2020-02-01)
 
 ### [2.0.1](https://github.com/marko-js/rollup/compare/v2.0.0...v2.0.1) (2019-10-02)
