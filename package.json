@@ -33,7 +33,7 @@
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
     "rollup-plugin-postcss": "^2.1.1",
-    "standard-version": "^7.1.0",
+    "standard-version": "^8.0.1",
     "ts-jest": "^25.2.1",
     "typescript": "^3.8.2"
   },
