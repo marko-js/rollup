@@ -1,6 +1,6 @@
 import fs from "mz/fs";
 import path from "path";
-import { PluginImpl } from "rollup";
+import { PluginImpl, TransformSourceDescription } from "rollup";
 import commonJSPlugin from "@rollup/plugin-commonjs";
 import { createFilter } from "rollup-pluginutils";
 import ConcatMap from "concat-with-sourcemaps";
@@ -9,7 +9,7 @@ const isMarkoRuntime = /\/marko\/(src|dist)\/runtime\//;
 const { transform: transformCommonJS } = commonJSPlugin({
   include: ["**/*.marko"],
   extensions: [".marko"],
-  sourceMap: false
+  sourceMap: false,
 });
 
 interface CompilationResult {
@@ -52,7 +52,7 @@ const plugin: PluginImpl<{
       name: "@marko/rollup",
       supportsStaticESM: true,
       supportsDynamicImport: true,
-      supportsTopLevelAwait: true
+      supportsTopLevelAwait: true,
     },
     babelConfig.caller
   );
@@ -61,7 +61,7 @@ const plugin: PluginImpl<{
     writeToDisk: false,
     writeVersionComment: false,
     sourceMaps: true,
-    babelConfig
+    babelConfig,
   };
 
   return {
@@ -154,7 +154,7 @@ const plugin: PluginImpl<{
         return [
           importStr(DEPS_PREFIX + id),
           importStr("marko/components", "components"),
-          `components.init(${runtimeId ? JSON.stringify(runtimeId) : ""})`
+          `components.init(${runtimeId ? JSON.stringify(runtimeId) : ""})`,
         ].join(";");
       }
 
@@ -213,7 +213,11 @@ const plugin: PluginImpl<{
           // When compiling with Marko 4 and we have external dependencies we need to load them as commonjs imports
           // or things blow up. This hack uses the commonjs plugin to convert the Marko output
           // code to an esmodule before we concat it :shrug:.
-          const esModule = transformCommonJS!.call(this, code, id);
+          const esModule = transformCommonJS!.call(
+            this,
+            code,
+            id
+          ) as TransformSourceDescription;
 
           if (esModule) {
             deps.push(esModule.code);
@@ -226,19 +230,19 @@ const plugin: PluginImpl<{
           concat.add(id, code, map as Parameters<typeof concat.add>[2]);
           return {
             code: concat.content.toString(),
-            sourcemap: concat.sourceMap
+            sourcemap: concat.sourceMap,
           };
         }
       }
 
       return {
         code: deps.join(";"),
-        sourcemap: ""
+        sourcemap: "",
       };
     },
     generateBundle() {
       compiledTemplates.clear();
-    }
+    },
   };
 };
 
@@ -246,7 +250,7 @@ function isMarkoFile(file: string) {
   return path.extname(file) === ".marko";
 }
 
-function isMarko4Compiler(compiler) {
+function isMarko4Compiler(compiler: any) {
   return Boolean(compiler.builder);
 }
 
