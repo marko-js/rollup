@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/marko-js/rollup/compare/v2.1.1...v2.2.0) (2020-08-25)
+
+
+### Features
+
+* update deps, cleanup config, support rollup 2 ([927a5b5](https://github.com/marko-js/rollup/commit/927a5b56f72619e7a8e20ca34761db99b027d227))
+
+
+### Bug Fixes
+
+* plugin compatibility with Rollup Watch Mode ([00a668c](https://github.com/marko-js/rollup/commit/00a668c4ccef7487ccc2c1cb4b2987cd332bb0da))
+
 ### [2.1.1](https://github.com/marko-js/rollup/compare/v2.1.0...v2.1.1) (2020-03-03)
 
 ## [2.1.0](https://github.com/marko-js/rollup/compare/v2.0.3...v2.1.0) (2020-03-03)
