@@ -167,6 +167,7 @@ const plugin: PluginImpl<{
           markoConfig
         ) as CompilationResult;
         compiledTemplates.set(id, compiled);
+        this.addWatchFile(id);
       }
 
       const { code, meta, map } = compiled;
@@ -237,7 +238,6 @@ const plugin: PluginImpl<{
     },
     generateBundle() {
       compiledTemplates.clear();
-      virtualFiles.clear();
     }
   };
 };
