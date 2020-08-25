@@ -52,7 +52,7 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "peerDependencies": {
-    "marko": "^4",
+    "marko": "^4 || ^5.0.0-next || ^5",
     "rollup": "^1 || ^2"
   },
   "repository": {
