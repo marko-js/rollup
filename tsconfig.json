@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "es2015", "scripthost"],
+    "lib": ["dom", "es2019", "scripthost"],
     "pretty": true,
-    "target": "es5",
-    "outDir": "./dist",
+    "strict": true,
     "sourceMap": true,
+    "target": "es2019",
     "declaration": true,
+    "module": "commonjs",
     "stripInternal": true,
     "importHelpers": true,
     "esModuleInterop": true,
-    "strictNullChecks": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true

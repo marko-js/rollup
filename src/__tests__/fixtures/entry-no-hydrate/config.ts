@@ -4,15 +4,15 @@ import marko from "../../../index";
 
 export default {
   input: "src/index.marko",
-  external: (id: string) => id.startsWith("marko/"),
+  external: (id: string): boolean => id.startsWith("marko/"),
   plugins: [
     marko(),
     nodeResolve({
       browser: true,
-      extensions: [".js", ".marko"]
+      extensions: [".js", ".marko"],
     }),
     commonjs({
-      extensions: [".js", ".marko"]
-    })
-  ]
+      extensions: [".js", ".marko"],
+    }),
+  ],
 };

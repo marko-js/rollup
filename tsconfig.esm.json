@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "exclude": ["**/__*__"],
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist/esm",
+    "module": "ES2015"
   }
 }
