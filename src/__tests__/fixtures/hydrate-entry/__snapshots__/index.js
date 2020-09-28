@@ -8,7 +8,7 @@ var marko_renderer = _interopDefault(require('marko/dist/runtime/components/rend
 var marko_defineComponent = _interopDefault(require('marko/dist/runtime/components/defineComponent'));
 var marko_createElement = _interopDefault(require('marko/dist/runtime/vdom/helpers/v-element'));
 var marko_const = _interopDefault(require('marko/dist/runtime/vdom/helpers/const'));
-var components = _interopDefault(require('marko/components'));
+var components = require('marko/components');
 
 function createCommonjsModule(fn, basedir, module) {
 	return module = {

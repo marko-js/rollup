@@ -77,6 +77,15 @@ const plugin: PluginImpl<{
           return;
         }
 
+        if (
+          warning.code === "EVAL" &&
+          warning.loc &&
+          warning.loc.file &&
+          isMarkoRuntime.test(warning.loc && warning.loc.file)
+        ) {
+          return;
+        }
+
         onwarn!(warning, warn);
       };
 
@@ -153,8 +162,8 @@ const plugin: PluginImpl<{
       if (isHydrate) {
         return [
           importStr(DEPS_PREFIX + id),
-          importStr("marko/components", "components"),
-          `components.init(${runtimeId ? JSON.stringify(runtimeId) : ""})`,
+          importStr("marko/components", "{ init }"),
+          `init(${runtimeId ? JSON.stringify(runtimeId) : ""})`,
         ].join(";");
       }
 
@@ -192,9 +201,9 @@ const plugin: PluginImpl<{
           if (SPLIT_COMPONENT_REG.test(meta.component)) {
             // Split components (component-browser.js) do not register themselves, so we inline code to do this manually.
             deps.push(
-              importStr("marko/components", "components"),
+              importStr("marko/components", "{ register }"),
               importStr(meta.component, "component"),
-              `components.register(${JSON.stringify(meta.id)}, component)`
+              `register(${JSON.stringify(meta.id)}, component)`
             );
           } else {
             deps.push(importStr(meta.component));

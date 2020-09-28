@@ -1,9 +1,7 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
 require('marko/dist/runtime/components');
-var components$1 = _interopDefault(require('marko/components'));
+var components$1 = require('marko/components');
 
 var component = {
   onMount() {
