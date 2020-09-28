@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/marko-js/rollup/compare/v2.0.2...v2.3.0) (2020-09-28)
+
+
+### Features
+
+* marko 5 compiler support ([3d2184b](https://github.com/marko-js/rollup/commit/3d2184bf2f42c78fd4fb8c07e5d88f4a1a3e983f))
+* update deps, cleanup config, support rollup 2 ([927a5b5](https://github.com/marko-js/rollup/commit/927a5b56f72619e7a8e20ca34761db99b027d227))
+
+
+### Bug Fixes
+
+* marko 5 imports, remove warning about eval ([a2e311f](https://github.com/marko-js/rollup/commit/a2e311fd61819c5579af699009fc854dd79d3f7f))
+* marko 5 peer dependency ([633fa8f](https://github.com/marko-js/rollup/commit/633fa8f94c2ffc36be7a3647a1e1f4710824c9b5))
+* plugin compatibility with Rollup Watch Mode ([00a668c](https://github.com/marko-js/rollup/commit/00a668c4ccef7487ccc2c1cb4b2987cd332bb0da))
+* run lint on all files ([52969eb](https://github.com/marko-js/rollup/commit/52969eb92c77dba791e15bbd98feb2f2c43ddad1))
+* use specifiers where possible on inserted imports ([83cea9d](https://github.com/marko-js/rollup/commit/83cea9d1ca7d082eadafd66f0f0d14639376db6b))
+
 ### [2.2.1](https://github.com/marko-js/rollup/compare/v2.2.0...v2.2.1) (2020-08-25)
 
 
