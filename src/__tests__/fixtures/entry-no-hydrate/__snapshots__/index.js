@@ -2,118 +2,77 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+var _marko_createElement = require('marko/dist/runtime/vdom/helpers/v-element');
+var _marko_renderer = require('marko/dist/runtime/components/renderer');
+var dom = require('marko/dist/runtime/dom');
+var registryBrowser = require('marko/dist/runtime/components/registry-browser');
+var _marko_defineComponent = require('marko/dist/runtime/components/defineComponent');
+var _marko_tag = require('marko/dist/runtime/helpers/render-tag');
 
-var require$$0 = _interopDefault(require('marko/dist/vdom'));
-var components_registry_browser = _interopDefault(require('marko/dist/runtime/components/registry-browser'));
-var marko_renderer = _interopDefault(require('marko/dist/runtime/components/renderer'));
-var marko_defineComponent = _interopDefault(require('marko/dist/runtime/components/defineComponent'));
-var marko_createElement = _interopDefault(require('marko/dist/runtime/vdom/helpers/v-element'));
-var marko_const = _interopDefault(require('marko/dist/runtime/vdom/helpers/const'));
-var marko_loadTag = _interopDefault(require('marko/dist/runtime/helpers/load-tag'));
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-function createCommonjsModule(fn, basedir, module) {
-	return module = {
-	  path: basedir,
-	  exports: {},
-	  require: function (path, base) {
-      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
-    }
-	}, fn(module, module.exports), module.exports;
-}
+var _marko_createElement__default = /*#__PURE__*/_interopDefaultLegacy(_marko_createElement);
+var _marko_renderer__default = /*#__PURE__*/_interopDefaultLegacy(_marko_renderer);
+var _marko_defineComponent__default = /*#__PURE__*/_interopDefaultLegacy(_marko_defineComponent);
+var _marko_tag__default = /*#__PURE__*/_interopDefaultLegacy(_marko_tag);
 
-function commonjsRequire () {
-	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
-}
+const _marko_template = dom.t();
 
-var classComponent = createCommonjsModule(function (module) {
+const _marko_node = _marko_createElement__default['default']("div", {
+  "id": "class"
+}, "0", null, 0, 1);
 
-var marko_template = module.exports = require$$0.t(),
-    marko_component = {
-        onMount: function() {
-          console.log("mounted");
-        }
-      },
-    marko_registerComponent = components_registry_browser.r,
-    marko_componentType = marko_registerComponent("/@marko/rollup$latest/src/__tests__/fixtures/entry-no-hydrate/src/components/class-component.marko", function() {
-      return module.exports;
-    }),
-    marko_const_nextId = marko_const("4d364d"),
-    marko_node0 = marko_createElement("div", {
-        id: "class"
-      }, "0", null, 0, 0, {
-        i: marko_const_nextId()
-      });
+const _marko_componentType = registryBrowser.r("KA0TDeGH", () => _marko_template),
+      _marko_component = {
+  onMount() {
+    console.log("mounted");
+  }
 
-function render(input, out, __component, component, state) {
+};
 
-  out.n(marko_node0, component);
-}
+_marko_template._ = _marko_renderer__default['default'](function (input, out, _component, component, state) {
+  out.n(_marko_node, component);
+}, {
+  t: _marko_componentType
+}, _marko_component);
+_marko_template.Component = _marko_defineComponent__default['default'](_marko_component, _marko_template._);
 
-marko_template._ = marko_renderer(render, {
-    e_: marko_componentType
-  }, marko_component);
+const _marko_template$1 = dom.t();
 
-marko_template.Component = marko_defineComponent(marko_component, marko_template._);
-});
+const _marko_componentType$1 = registryBrowser.r("7i0iDZmN", () => _marko_template$1),
+      _marko_component$1 = {};
 
-var implicitComponent = createCommonjsModule(function (module) {
+_marko_template$1._ = _marko_renderer__default['default'](function (input, out, _component, component, state) {
+  out.be("div", {
+    "id": "implicit"
+  }, "0", component, null, 1);
 
-var marko_template = module.exports = require$$0.t(),
-    marko_registerComponent = components_registry_browser.r,
-    marko_componentType = marko_registerComponent("/@marko/rollup$latest/src/__tests__/fixtures/entry-no-hydrate/src/components/implicit-component.marko", function() {
-      return module.exports;
-    }),
-    class_component_tag = marko_loadTag(classComponent),
-    marko_attrs0 = {
-        id: "implicit"
-      };
-
-function render(input, out, __component, component, state) {
-
-  out.be("div", marko_attrs0, "0", component);
-
-  class_component_tag({}, out, __component, "1");
+  _marko_tag__default['default'](_marko_template, {}, out, _component, "1");
 
   out.ee();
-}
+}, {
+  t: _marko_componentType$1,
+  i: true
+}, _marko_component$1);
+_marko_template$1.Component = _marko_defineComponent__default['default'](_marko_component$1, _marko_template$1._);
 
-marko_template._ = marko_renderer(render, {
-    d_: true,
-    e_: marko_componentType
-  });
+const _marko_template$2 = dom.t();
 
-marko_template.Component = marko_defineComponent({}, marko_template._);
-});
+const _marko_componentType$2 = registryBrowser.r("9v2fgbxx", () => _marko_template$2),
+      _marko_component$2 = {};
 
-var src = createCommonjsModule(function (module) {
+_marko_template$2._ = _marko_renderer__default['default'](function (input, out, _component, component, state) {
+  out.be("div", {
+    "id": "page"
+  }, "0", component, null, 1);
 
-var marko_template = module.exports = require$$0.t(),
-    marko_registerComponent = components_registry_browser.r,
-    marko_componentType = marko_registerComponent("/@marko/rollup$latest/src/__tests__/fixtures/entry-no-hydrate/src/index.marko", function() {
-      return module.exports;
-    }),
-    implicit_component_tag = marko_loadTag(implicitComponent),
-    marko_attrs0 = {
-        id: "page"
-      };
-
-function render(input, out, __component, component, state) {
-
-  out.be("div", marko_attrs0, "0", component);
-
-  implicit_component_tag({}, out, __component, "1");
+  _marko_tag__default['default'](_marko_template$1, {}, out, _component, "1");
 
   out.ee();
-}
+}, {
+  t: _marko_componentType$2,
+  i: true
+}, _marko_component$2);
+_marko_template$2.Component = _marko_defineComponent__default['default'](_marko_component$2, _marko_template$2._);
 
-marko_template._ = marko_renderer(render, {
-    d_: true,
-    e_: marko_componentType
-  });
-
-marko_template.Component = marko_defineComponent({}, marko_template._);
-});
-
-exports.__moduleExports = src;
-exports.default = src;
+exports.default = _marko_template$2;

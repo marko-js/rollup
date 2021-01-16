@@ -1,16 +1,10 @@
 import fs from "mz/fs";
 import path from "path";
-import { PluginImpl, TransformSourceDescription } from "rollup";
-import commonJSPlugin from "@rollup/plugin-commonjs";
-import { createFilter } from "rollup-pluginutils";
+import { PluginImpl } from "rollup";
+import { createFilter } from "@rollup/pluginutils";
 import ConcatMap from "concat-with-sourcemaps";
 
 const isMarkoRuntime = /\/marko\/(src|dist)\/runtime\//;
-const { transform: transformCommonJS } = commonJSPlugin({
-  include: ["**/*.marko"],
-  extensions: [".marko"],
-  sourceMap: false,
-});
 
 interface CompilationResult {
   code: string;
@@ -23,7 +17,7 @@ interface CompilationResult {
   };
 }
 
-const DEFAULT_COMPILER = require.resolve("marko/compiler");
+const DEFAULT_COMPILER = require.resolve("@marko/compiler");
 const SPLIT_COMPONENT_REG = /[/.]component-browser(?:\.[^.]+)?$/;
 const PREFIX_REG = /^\0marko-[^:]+:/;
 const VIRTUAL_PREFIX = "\0marko-virtual:";
@@ -45,7 +39,7 @@ const plugin: PluginImpl<{
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const compiler = require(options.compiler || DEFAULT_COMPILER);
   const virtualFiles: Map<string, string> = new Map();
-  const compiledTemplates: Map<string, CompilationResult> = new Map();
+  const cache: Map<string, CompilationResult> = new Map();
   const babelConfig = Object.assign({}, options.babelConfig);
   babelConfig.caller = Object.assign(
     {
@@ -58,10 +52,10 @@ const plugin: PluginImpl<{
   );
 
   const markoConfig = {
-    writeToDisk: false,
-    writeVersionComment: false,
-    sourceMaps: true,
+    cache,
     babelConfig,
+    output: "dom",
+    sourceMaps: true
   };
 
   return {
@@ -126,7 +120,7 @@ const plugin: PluginImpl<{
 
       return null;
     },
-    load(id) {
+    async load(id) {
       if (virtualFiles.has(id)) {
         return virtualFiles.get(id)!;
       }
@@ -136,12 +130,12 @@ const plugin: PluginImpl<{
       if (prefixMatch) {
         const [prefix] = prefixMatch;
         const filePath = id.slice(prefix.length);
-        return fs.readFile(filePath, "utf-8");
+        return await fs.promises.readFile(filePath, "utf-8");
       }
 
       return null;
     },
-    transform(source, id) {
+    async transform(source, id) {
       const prefixMatch = PREFIX_REG.exec(id);
       let prefix: string | undefined;
 
@@ -167,15 +161,11 @@ const plugin: PluginImpl<{
         ].join(";");
       }
 
-      let compiled = compiledTemplates.get(id);
+      let compiled = cache.get(id);
 
       if (!compiled) {
-        compiled = compiler.compileForBrowser(
-          source,
-          id,
-          markoConfig
-        ) as CompilationResult;
-        compiledTemplates.set(id, compiled);
+        compiled = await compiler.compile(source, id, markoConfig) as CompilationResult;
+        cache.set(id, compiled);
         this.addWatchFile(id);
       }
 
@@ -218,30 +208,13 @@ const plugin: PluginImpl<{
           }
         }
       } else {
-        if (isMarko4Compiler(compiler)) {
-          // When compiling with Marko 4 and we have external dependencies we need to load them as commonjs imports
-          // or things blow up. This hack uses the commonjs plugin to convert the Marko output
-          // code to an esmodule before we concat it :shrug:.
-          const esModule = transformCommonJS!.call(
-            this,
-            code,
-            id
-          ) as TransformSourceDescription;
-
-          if (esModule) {
-            deps.push(esModule.code);
-          } else {
-            return null;
-          }
-        } else {
-          const concat = new ConcatMap(true, "", ";");
-          concat.add(null, deps.join(";"));
-          concat.add(id, code, map as Parameters<typeof concat.add>[2]);
-          return {
-            code: concat.content.toString(),
-            sourcemap: concat.sourceMap,
-          };
-        }
+        const concat = new ConcatMap(true, "", ";");
+        concat.add(null, deps.join(";"));
+        concat.add(id, code, map as Parameters<typeof concat.add>[2]);
+        return {
+          code: concat.content.toString(),
+          sourcemap: concat.sourceMap,
+        };
       }
 
       return {
@@ -250,17 +223,13 @@ const plugin: PluginImpl<{
       };
     },
     generateBundle() {
-      compiledTemplates.clear();
+      cache.clear();
     },
   };
 };
 
 function isMarkoFile(file: string) {
   return path.extname(file) === ".marko";
-}
-
-function isMarko4Compiler(compiler: any) {
-  return Boolean(compiler.builder);
 }
 
 function importStr(request: string, as?: string) {
