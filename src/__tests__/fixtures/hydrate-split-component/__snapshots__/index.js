@@ -1,9 +1,10 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+var components = require('marko/components');
 
-require('marko/dist/runtime/components');
-var components$1 = _interopDefault(require('marko/components'));
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+var components__default = /*#__PURE__*/_interopDefaultLegacy(components);
 
 var component = {
   onMount() {
@@ -11,6 +12,6 @@ var component = {
   },
 };
 
-components$1.register("/@marko/rollup$latest/src/__tests__/fixtures/hydrate-split-component/src/components/split-component.component-browser", component);
+components__default['default'].register("AW2ukATU", component);
 
-components$1.init();
+components__default['default'].init();

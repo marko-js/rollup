@@ -1,58 +1,38 @@
 'use strict';
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+var _marko_createElement = require('marko/dist/runtime/vdom/helpers/v-element');
+var _marko_renderer = require('marko/dist/runtime/components/renderer');
+var dom = require('marko/dist/runtime/dom');
+var registryBrowser = require('marko/dist/runtime/components/registry-browser');
+var _marko_defineComponent = require('marko/dist/runtime/components/defineComponent');
+var components = require('marko/components');
 
-var require$$0 = _interopDefault(require('marko/dist/vdom'));
-var components_registry_browser = _interopDefault(require('marko/dist/runtime/components/registry-browser'));
-var marko_renderer = _interopDefault(require('marko/dist/runtime/components/renderer'));
-var marko_defineComponent = _interopDefault(require('marko/dist/runtime/components/defineComponent'));
-var marko_createElement = _interopDefault(require('marko/dist/runtime/vdom/helpers/v-element'));
-var marko_const = _interopDefault(require('marko/dist/runtime/vdom/helpers/const'));
-var components = _interopDefault(require('marko/components'));
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-function createCommonjsModule(fn, basedir, module) {
-	return module = {
-	  path: basedir,
-	  exports: {},
-	  require: function (path, base) {
-      return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
-    }
-	}, fn(module, module.exports), module.exports;
-}
+var _marko_createElement__default = /*#__PURE__*/_interopDefaultLegacy(_marko_createElement);
+var _marko_renderer__default = /*#__PURE__*/_interopDefaultLegacy(_marko_renderer);
+var _marko_defineComponent__default = /*#__PURE__*/_interopDefaultLegacy(_marko_defineComponent);
+var components__default = /*#__PURE__*/_interopDefaultLegacy(components);
 
-function commonjsRequire () {
-	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
-}
+const _marko_template = dom.t();
 
-var classComponent = createCommonjsModule(function (module) {
+const _marko_node = _marko_createElement__default['default']("div", {
+  "id": "class"
+}, "0", null, 0, 1);
 
-var marko_template = module.exports = require$$0.t(),
-    marko_component = {
-        onMount: function() {
-          console.log("mounted");
-        }
-      },
-    marko_registerComponent = components_registry_browser.r,
-    marko_componentType = marko_registerComponent("/@marko/rollup$latest/src/__tests__/fixtures/hydrate-entry-custom-init/src/components/class-component.marko", function() {
-      return module.exports;
-    }),
-    marko_const_nextId = marko_const("4d364d"),
-    marko_node0 = marko_createElement("div", {
-        id: "class"
-      }, "0", null, 0, 0, {
-        i: marko_const_nextId()
-      });
+const _marko_componentType = registryBrowser.r("VAGN//0e", () => _marko_template),
+      _marko_component = {
+  onMount() {
+    console.log("mounted");
+  }
 
-function render(input, out, __component, component, state) {
+};
 
-  out.n(marko_node0, component);
-}
+_marko_template._ = _marko_renderer__default['default'](function (input, out, _component, component, state) {
+  out.n(_marko_node, component);
+}, {
+  t: _marko_componentType
+}, _marko_component);
+_marko_template.Component = _marko_defineComponent__default['default'](_marko_component, _marko_template._);
 
-marko_template._ = marko_renderer(render, {
-    e_: marko_componentType
-  }, marko_component);
-
-marko_template.Component = marko_defineComponent(marko_component, marko_template._);
-});
-
-components.init("SOME_COMPONENTS");
+components__default['default'].init("SOME_COMPONENTS");
