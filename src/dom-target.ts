@@ -4,8 +4,6 @@ import { PluginImpl } from "rollup";
 import { createFilter } from "@rollup/pluginutils";
 import ConcatMap from "concat-with-sourcemaps";
 
-const isMarkoRuntime = /\/marko\/(src|dist)\/runtime\//;
-
 interface CompilationResult {
   code: string;
   map: unknown;
@@ -14,10 +12,12 @@ interface CompilationResult {
     component?: string;
     deps?: Array<{ path: string; virtualPath: string; code: string } | string>;
     tags?: string[];
+    watchFiles?: string[]
   };
 }
 
 const DEFAULT_COMPILER = require.resolve("@marko/compiler");
+const IS_MARKO_RUNTIME = /\/marko\/(src|dist)\/runtime\//;
 const SPLIT_COMPONENT_REG = /[/.]component-browser(?:\.[^.]+)?$/;
 const PREFIX_REG = /^\0marko-[^:]+:/;
 const VIRTUAL_PREFIX = "\0marko-virtual:";
@@ -26,6 +26,7 @@ const DEPS_PREFIX = "\0marko-dependencies:";
 const RESOLVE_OPTS = { skipSelf: true };
 
 const plugin: PluginImpl<{
+  _cache?: Map<string, unknown>,
   compiler?: string;
   include?: Parameters<typeof createFilter>[0];
   exclude?: Parameters<typeof createFilter>[1];
@@ -39,7 +40,7 @@ const plugin: PluginImpl<{
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const compiler = require(options.compiler || DEFAULT_COMPILER);
   const virtualFiles: Map<string, string> = new Map();
-  const cache: Map<string, CompilationResult> = new Map();
+  const cache: Map<string, CompilationResult> = options._cache || new Map();
   const babelConfig = Object.assign({}, options.babelConfig);
   babelConfig.caller = Object.assign(
     {
@@ -47,6 +48,7 @@ const plugin: PluginImpl<{
       supportsStaticESM: true,
       supportsDynamicImport: true,
       supportsTopLevelAwait: true,
+      supportsExportNamespaceFrom: true
     },
     babelConfig.caller
   );
@@ -59,19 +61,19 @@ const plugin: PluginImpl<{
   };
 
   return {
-    name: "marko",
+    name: "marko/dom",
     options(inputOptions) {
       const { onwarn } = inputOptions;
       inputOptions.onwarn = (warning, warn) => {
         if (
           warning.code === "CIRCULAR_DEPENDENCY" &&
           warning.importer &&
-          isMarkoRuntime.test(warning.importer)
+          IS_MARKO_RUNTIME.test(warning.importer)
         ) {
           return;
         }
 
-        onwarn!(warning, warn);
+        onwarn && (onwarn(warning, warn));
       };
 
       return inputOptions;
@@ -94,6 +96,10 @@ const plugin: PluginImpl<{
 
             if (importeePrefix === VIRTUAL_PREFIX) {
               return path.resolve(importer, "..", importee);
+            }
+
+            if (importer === importee) {
+              return importeePrefix + importee;
             }
           }
 
@@ -163,6 +169,12 @@ const plugin: PluginImpl<{
       const { code, meta, map } = compiled;
       const deps: string[] = [];
 
+      if (meta.watchFiles) {
+        for (const watchFile of meta.watchFiles) {
+          this.addWatchFile(watchFile);
+        }
+      }
+
       if (meta.deps) {
         for (const dep of meta.deps) {
           if (typeof dep === "string") {
@@ -214,7 +226,9 @@ const plugin: PluginImpl<{
       };
     },
     generateBundle() {
-      cache.clear();
+      if (!options._cache) {
+        cache.clear();
+      }
     },
   };
 };

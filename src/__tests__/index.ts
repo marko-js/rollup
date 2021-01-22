@@ -9,6 +9,9 @@ const FIXTURES = path.join(__dirname, "fixtures");
 expect.extend({ toMatchFile });
 
 fs.readdirSync(FIXTURES).forEach((fixture) => {
+  if (!fixture.startsWith("dom-")) {
+    return;
+  }
   test(fixture, async () => {
     const dir = path.join(FIXTURES, fixture);
     const snapshotDir = path.join(dir, "__snapshots__");
@@ -19,19 +22,14 @@ fs.readdirSync(FIXTURES).forEach((fixture) => {
       plugins: [css({ extract: true }), ...config.plugins],
     });
 
-    const generated = await bundle.generate({
-      dir,
-      format: "cjs",
-      exports: "named",
-    });
+    const generated = await bundle.generate({ dir });
+
     generated.output.forEach((output) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const source = ((output as any).source || (output as any).code)
         .toString("utf-8")
         .replace(/@marko\/rollup\$\d\.\d\.\d/g, "@marko/rollup$latest");
       expect(source).toMatchFile(path.join(snapshotDir, output.fileName));
-      console.log;
-      // expect(code).toM
     });
   });
 });
