@@ -1,0 +1,10 @@
+$ const $global = out.global;
+$ const entries = $global.__rollupEntries || ($global.__rollupEntries = []);
+$ let writtenEntries = 0;
+<__flush_here_and_after__>
+  $ const lastWrittenEntry = writtenEntries;
+  $ writtenEntries = entries.length;
+  <for|i| from=lastWrittenEntry to=(writtenEntries - 1)>
+    <${input.renderBody}(entries[i], ...__MARKO_MANIFEST__)/>
+  </>
+</>
