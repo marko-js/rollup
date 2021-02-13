@@ -121,12 +121,17 @@ const plugin: PluginImpl<{
       return outputOptions;
     },
     async resolveId(importee, importer) {
-      if (browserOptions && importer && !isMarkoFile(importer)) {
+      if (
+        browserOptions &&
+        importer &&
+        isMarkoFile(importee) && // We only want Marko files in the browser bundle input
+        !isMarkoFile(importer)
+      ) {
         const resolved = await this.resolve(importee, importer, RESOLVE_OPTS);
 
         if (resolved) {
-          const relative = path.relative(CWD, resolved.id);
-          browserOptions.input![toEntryId(relative)] = relative;
+          const relative = path.relative(CWD, resolved.id); // Shouldn't this be relative to the Rollup input dir ?
+          browserOptions.input![toEntryId(relative)] = resolved.id; // Rollup prefers absolute paths as input
           return resolved;
         }
       }
@@ -166,7 +171,7 @@ const plugin: PluginImpl<{
     async generateBundle(outputOptions, serverBundle) {
       if (browserOptions && browserBuild) {
         const browserBundle = toBundle(
-          await browserBuild.generate(browserOptions.output || outputOptions)
+          await browserBuild.write(browserOptions.output || outputOptions)
         );
 
         for (const filename in browserBundle) {
