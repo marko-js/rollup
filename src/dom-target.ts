@@ -12,7 +12,7 @@ interface CompilationResult {
     component?: string;
     deps?: Array<{ path: string; virtualPath: string; code: string } | string>;
     tags?: string[];
-    watchFiles?: string[]
+    watchFiles?: string[];
   };
 }
 
@@ -26,7 +26,7 @@ const DEPS_PREFIX = "\0marko-dependencies:";
 const RESOLVE_OPTS = { skipSelf: true };
 
 const plugin: PluginImpl<{
-  _cache?: Map<string, unknown>,
+  _cache?: Map<string, unknown>;
   compiler?: string;
   include?: Parameters<typeof createFilter>[0];
   exclude?: Parameters<typeof createFilter>[1];
@@ -48,7 +48,7 @@ const plugin: PluginImpl<{
       supportsStaticESM: true,
       supportsDynamicImport: true,
       supportsTopLevelAwait: true,
-      supportsExportNamespaceFrom: true
+      supportsExportNamespaceFrom: true,
     },
     babelConfig.caller
   );
@@ -57,7 +57,7 @@ const plugin: PluginImpl<{
     cache,
     babelConfig,
     output: "dom",
-    sourceMaps: true
+    sourceMaps: true,
   };
 
   return {
@@ -73,7 +73,7 @@ const plugin: PluginImpl<{
           return;
         }
 
-        onwarn && (onwarn(warning, warn));
+        onwarn && onwarn(warning, warn);
       };
 
       return inputOptions;
@@ -161,7 +161,11 @@ const plugin: PluginImpl<{
       let compiled = cache.get(id);
 
       if (!compiled) {
-        compiled = await compiler.compile(source, id, markoConfig) as CompilationResult;
+        compiled = (await compiler.compile(
+          source,
+          id,
+          markoConfig
+        )) as CompilationResult;
         cache.set(id, compiled);
         this.addWatchFile(id);
       }

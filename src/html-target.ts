@@ -8,7 +8,7 @@ import {
   OutputOptions,
   RollupOutput,
   OutputChunk,
-  OutputAsset
+  OutputAsset,
 } from "rollup";
 import { createFilter } from "@rollup/pluginutils";
 import DOMTarget from "./dom-target";
@@ -53,14 +53,14 @@ const plugin: PluginImpl<{
     supportsDynamicImport: true,
     supportsTopLevelAwait: true,
     supportsExportNamespaceFrom: true,
-    ...babelConfig.caller
+    ...babelConfig.caller,
   };
 
   const markoConfig = {
     cache,
     babelConfig,
     output: "html",
-    sourceMaps: true
+    sourceMaps: true,
   };
 
   let browserOptions:
@@ -74,7 +74,7 @@ const plugin: PluginImpl<{
   if (options.browser) {
     browserOptions = { ...options.browser, input: {} };
     if (browserOptions.plugins) {
-      if (browserOptions.plugins.some(it => it.name === "marko/dom")) {
+      if (browserOptions.plugins.some((it) => it.name === "marko/dom")) {
         throw new Error(
           "@marko/rollup.html adds the Marko DOM plugin for you, please remove the plugin from your browser config."
         );
@@ -89,7 +89,7 @@ const plugin: PluginImpl<{
           exclude: options.exclude,
           compiler: options.compiler,
           runtimeId: options.runtimeId,
-          babelConfig: options.babelConfig
+          babelConfig: options.babelConfig,
         })
       );
     }
@@ -153,7 +153,7 @@ const plugin: PluginImpl<{
 
       return {
         code,
-        sourcemap: map
+        sourcemap: map,
       };
     },
     async buildEnd(err) {
@@ -171,14 +171,18 @@ const plugin: PluginImpl<{
 
         for (const filename in browserBundle) {
           const chunk = browserBundle[filename];
-          if (chunk.type === "chunk" && chunk.isEntry && browserOptions.input![chunk.name]) {
+          if (
+            chunk.type === "chunk" &&
+            chunk.isEntry &&
+            browserOptions.input![chunk.name]
+          ) {
             const assets = getDeps(chunk, browserBundle);
           }
         }
 
         browserBuild = undefined;
       }
-    }
+    },
   };
 };
 
@@ -216,7 +220,7 @@ function getDeps(
     for (const filename of cur.imports) {
       const child = chunksByFilename[filename];
 
-      if (!child) debugger;
+      //      if (!child) debugger;
 
       if (child.type === "chunk") {
         addImports(child);
@@ -224,10 +228,10 @@ function getDeps(
 
       result.add(filename);
     }
-  }
+  };
 
   addImports(entry);
   return result.add(entry.fileName);
-};
+}
 
 export default plugin;
