@@ -16,6 +16,10 @@ interface CompilationResult {
   };
 }
 
+interface ResolvablePromise<T> extends Promise<T> {
+  resolve(value: T): void;
+}
+
 const DEFAULT_COMPILER = require.resolve("@marko/compiler");
 const IS_MARKO_RUNTIME = /\/marko\/(src|dist)\/runtime\//;
 const SPLIT_COMPONENT_REG = /[/.]component-browser(?:\.[^.]+)?$/;
@@ -40,6 +44,7 @@ const plugin: PluginImpl<{
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const compiler = require(options.compiler || DEFAULT_COMPILER);
   const virtualFiles: Map<string, string> = new Map();
+  const virtualStyles: Map<string, ResolvablePromise<string>> = new Map();
   const cache: Map<string, CompilationResult> = options._cache || new Map();
   const babelConfig = Object.assign({}, options.babelConfig);
   babelConfig.caller = Object.assign(
@@ -112,7 +117,16 @@ const plugin: PluginImpl<{
           return resolved;
         }
       } else if (hydrate && isMarkoFile(importee)) {
+        // Emit a virtual "style" file for each Marko entry
+        this.emitFile({
+          type: "chunk",
+          id: VIRTUAL_PREFIX + getStylePath(importee),
+          // name: "css/" + toEntryId(importee), // See comment in PR about this
+        });
+
         return (initComponents ? HYDRATE_PREFIX : DEPS_PREFIX) + importee;
+      } else if (isStyleFile(importee)) {
+        return importee.slice(VIRTUAL_PREFIX.length);
       }
 
       return null;
@@ -120,6 +134,11 @@ const plugin: PluginImpl<{
     async load(id) {
       if (virtualFiles.has(id)) {
         return virtualFiles.get(id)!;
+      } else if (isStyleFile(id)) {
+        // The "style" file is coming later, I promise
+        const promisedStyle = createDeferredPromise<string>();
+        virtualStyles.set(id, promisedStyle);
+        return promisedStyle;
       }
 
       const prefixMatch = PREFIX_REG.exec(id);
@@ -143,6 +162,12 @@ const plugin: PluginImpl<{
 
       const isHydrate = prefix === HYDRATE_PREFIX;
       const isDeps = prefix === DEPS_PREFIX;
+
+      if (isStyleFile(id)) {
+        // Do not treeshake style files, this option was implemented in v2.21.0
+        // explicitly for CSS, see : https://github.com/rollup/rollup/pull/3663
+        return { moduleSideEffects: "no-treeshake" };
+      }
 
       if (!isMarkoFile(id) || !filter(id)) {
         return null;
@@ -172,6 +197,7 @@ const plugin: PluginImpl<{
 
       const { code, meta, map } = compiled;
       const deps: string[] = [];
+      const depsStyle: string[] = [];
 
       if (meta.watchFiles) {
         for (const watchFile of meta.watchFiles) {
@@ -182,13 +208,37 @@ const plugin: PluginImpl<{
       if (meta.deps) {
         for (const dep of meta.deps) {
           if (typeof dep === "string") {
-            deps.push(importStr(dep));
+            // This should also include SCSS, SASS, Less, Stylus, ...
+            if (dep.endsWith(".css")) {
+              depsStyle.push(importStr(dep));
+            } else {
+              deps.push(importStr(dep));
+            }
           } else if (dep.virtualPath) {
             virtualFiles.set(path.resolve(id, "..", dep.virtualPath), dep.code);
-            deps.push(importStr(VIRTUAL_PREFIX + dep.virtualPath));
+            // I used the 'dep.style' flag in CJS, but it's not in the interface
+            if (dep.virtualPath.endsWith(".css")) {
+              depsStyle.push(importStr(VIRTUAL_PREFIX + dep.virtualPath));
+            } else {
+              deps.push(importStr(VIRTUAL_PREFIX + dep.virtualPath));
+            }
           }
         }
       }
+
+      // Add the Marko deps to the style deps graph to keep it going
+      if (meta.tags) {
+        for (const dep of meta.tags) {
+          if (isMarkoFile(dep)) {
+            depsStyle.push(importStr(VIRTUAL_PREFIX + getStylePath(dep)));
+          }
+        }
+      }
+
+      // Save the style file for the future and resolve past promise
+      virtualFiles.set(getStylePath(id), depsStyle.join(";"));
+      const promisedStyle = virtualStyles.get(getStylePath(id));
+      if (promisedStyle) promisedStyle.resolve(depsStyle.join(";"));
 
       // dependencies is active when we are loading an entry page component.
       // We skip including the code for the component and just include
@@ -239,6 +289,27 @@ const plugin: PluginImpl<{
 
 function isMarkoFile(file: string) {
   return path.extname(file) === ".marko";
+}
+
+function isStyleFile(file: string) {
+  return path.extname(file) === ".style";
+}
+
+function getStylePath(file: string) {
+  return file.slice(0, -5) + "style";
+}
+
+function createDeferredPromise<T>() {
+  let resolve: (value: T) => void = () => {
+    return; // TS complained it was "used before being assigned"
+  };
+
+  const promise = new Promise((_resolve) => {
+    resolve = _resolve;
+  }) as ResolvablePromise<T>;
+
+  promise.resolve = resolve;
+  return promise;
 }
 
 function importStr(request: string, as?: string) {
