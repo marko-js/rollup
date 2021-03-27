@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/marko-js/rollup/compare/v2.2.1...v3.0.0) (2021-03-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop support for Marko 4 compiler
+* new api to support server plugin
+
+### Features
+
+* Linked server & browser compilers ([#6](https://github.com/marko-js/rollup/issues/6)) ([35644d7](https://github.com/marko-js/rollup/commit/35644d7ec398d888aa9bcb70008f79eb7cb46cce))
+
+
+### Bug Fixes
+
+* marko 5 imports, remove warning about eval ([a2e311f](https://github.com/marko-js/rollup/commit/a2e311fd61819c5579af699009fc854dd79d3f7f))
+
 ## [2.3.0](https://github.com/marko-js/rollup/compare/v2.0.2...v2.3.0) (2020-09-28)
 
 
