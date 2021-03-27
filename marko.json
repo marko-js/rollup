@@ -1,0 +1,13 @@
+{
+  "taglib-id": "marko-rollup",
+  "<rollup>": {
+    "attributes": {},
+    "autocomplete": [
+      {
+        "snippet": "rollup|${1:entry}, ${2:output}|",
+        "description": "Use to read output assets from the current rollup build.",
+        "descriptionMoreURL": "https://github.com/marko-js/rollup#rollup-tag"
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+import fs from "fs";
+static let watcher;
+static let pendingManifest;
+static function getLatestManifest($global) {
+  if (!watcher) {
+    watcher = fs.watch($global.__rollupManifest).on("change", () => {
+      pendingManifest = undefined
+      getLatestManifest($global);
+    });
+  }
+
+  return pendingManifest || (pendingManifest = fs.promises
+    .readFile($global.__rollupManifest, "utf-8")
+    .then(JSON.parse)
+    .catch(() =>
+      new Promise(resolve => watcher.once("change", resolve))
+        .then(() => getLatestManifest($global))
+    ));
+}
+
+$ const $global = out.global;
+<await(getLatestManifest($global))>
+  <@then|manifest|>
+    $ const entries = $global.__rollupEntries || ($global.__rollupEntries = []);
+    $ let writtenEntries = 0;
+    <__flush_here_and_after__>
+      $ const lastWrittenEntry = writtenEntries;
+      $ writtenEntries = entries.length;
+      <for|i| from=lastWrittenEntry to=(writtenEntries - 1)>
+        <${input.renderBody}(entries[i], ...manifest)/>
+      </>
+    </>
+  </>
+</>
