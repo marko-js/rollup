@@ -115,11 +115,13 @@ The second parameter `output` is an array of `AssetInfo | ChunkInfo` objects wit
   <rollup|entry, output|>
     $ const entryChunk = output.find(chunk => chunk.name === entry);
 
-    <for|fileName| of=entryChunk.imports>
-      <link rel="modulepreload" href=fileName/>
-    </for>
+    <if(entryChunk.size /* skip scripts all together if empty js file */)>
+      <for|fileName| of=entryChunk.imports>
+        <link rel="modulepreload" href=fileName/>
+      </for>
 
-    <script async type="module" src=entryChunk.fileName/>
+      <script async type="module" src=entryChunk.fileName/>
+    </if>
   </rollup>
 </head>
 ```
