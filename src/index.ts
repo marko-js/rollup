@@ -1,6 +1,7 @@
 import os from "os";
 import fs from "fs";
 import path from "path";
+import { Buffer } from "buffer";
 import * as rollup from "rollup";
 import { createHash } from "crypto";
 import type * as Compiler from "@marko/compiler";
@@ -27,8 +28,9 @@ interface Channel {
 }
 
 interface SerializedChunk extends rollup.OutputChunk {
-  code: never;
+  size: number;
   map: never;
+  code: never;
   exports: never;
   modules: never;
   facadeModuleId: never;
@@ -36,6 +38,7 @@ interface SerializedChunk extends rollup.OutputChunk {
 }
 
 interface SerializedAsset extends rollup.OutputAsset {
+  size: number;
   source: never;
 }
 
@@ -46,7 +49,6 @@ interface InternalOptions extends ReturnType<typeof normalizeOpts> {
 }
 
 const VIRTUAL_FILES = new Map<string, { code: string; map?: unknown }>();
-const DEFAULT_COMPILER = require.resolve("@marko/compiler");
 const PREFIX_REG = /^\0?marko-[^:]+:/;
 const BROWSER_ENTRY_PREFIX = "\0marko-browser-entry:";
 const SERVER_ENTRY_PREFIX = "\0marko-server-entry:";
@@ -205,6 +207,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
     isWrite: boolean;
   }[] = [];
   let isWatch = false;
+  let compiler: typeof Compiler;
   let wroteEmptyManifest = false;
   let registeredRollupTag: false | string = false;
   const bundlesPerWriter: (rollup.OutputBundle | null)[][] = [];
@@ -295,7 +298,8 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
   return {
     ...COMMON_PLUGIN,
     name: "marko/server",
-    buildStart() {
+    async buildStart() {
+      compiler ??= await opts.compiler;
       isWatch = this.meta.watchMode;
 
       if (!registeredRollupTag) {
@@ -305,7 +309,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
           "components",
           this.meta.watchMode ? "rollup-watch.marko" : "rollup.marko"
         );
-        opts.compiler.taglib.register("@marko/rollup", {
+        compiler.taglib.register("@marko/rollup", {
           "<rollup>": {
             template: registeredRollupTag,
           },
@@ -358,7 +362,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
         return null;
       }
 
-      const { code, map, meta } = await opts.compiler.compile(
+      const { code, map, meta } = await compiler.compile(
         source,
         id.replace(PREFIX_REG, ""),
         opts.markoConfig
@@ -428,6 +432,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
     ...markoConfig,
     output: "hydrate",
   };
+  let compiler: typeof Compiler;
   let writer: undefined | ReturnType<Channel["getBundleWriter"]>;
 
   return {
@@ -442,6 +447,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
       return COMMON_PLUGIN.options!.call(this, inputOptions);
     },
     async buildStart(inputOptions) {
+      compiler ??= await opts.compiler;
       if (channel.isActive) {
         // Here we load the temp file (created by the server compiler) with the
         // list of Marko files that need to be bundled.
@@ -496,7 +502,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
         id = id.slice(prefix.length);
       }
 
-      const { code, map, meta } = await opts.compiler.compile(
+      const { code, map, meta } = await compiler.compile(
         source,
         id,
         prefix === BROWSER_ENTRY_PREFIX ? hydrateConfig : markoConfig
@@ -528,8 +534,9 @@ function normalizeOpts(
   opts: Options = {}
 ) {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    compiler: require(opts.compiler || DEFAULT_COMPILER) as typeof Compiler,
+    compiler: import(opts.compiler || "@marko/compiler") as Promise<
+      typeof Compiler
+    >,
     markoConfig: {
       output,
       sourceMaps: true,
@@ -578,6 +585,7 @@ function serializeBundle(bundle: rollup.OutputBundle) {
       chunks.push({
         fileName,
         type: "asset",
+        size: getSize(chunk.source),
       } as SerializedAsset);
     } else {
       chunks.push({
@@ -591,6 +599,7 @@ function serializeBundle(bundle: rollup.OutputBundle) {
         referencedFiles: chunk.referencedFiles,
         isImplicitEntry: chunk.isImplicitEntry,
         implicitlyLoadedBefore: chunk.implicitlyLoadedBefore,
+        size: getSize(chunk.code),
       } as SerializedChunk);
     }
   }
@@ -603,6 +612,14 @@ async function getServerEntriesFile(channel: Channel) {
 
 async function getManifestFile(channel: Channel) {
   return path.join(await channel.tempDir, "manifest.json");
+}
+
+function getSize(source: string | Uint8Array) {
+  return (
+    (typeof source === "string"
+      ? Buffer.byteLength(source.replace(/^\s+$/m, ""))
+      : source.byteLength) || 0
+  );
 }
 
 function isEmpty(obj: unknown) {
