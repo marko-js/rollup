@@ -428,7 +428,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
     ...markoConfig,
     output: "hydrate",
   };
-  const writer = channel.isActive ? channel.getBundleWriter() : undefined;
+  let writer: undefined | ReturnType<Channel["getBundleWriter"]>;
 
   return {
     ...COMMON_PLUGIN,
@@ -436,7 +436,9 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
     async options(inputOptions) {
       // This communicates back with the server compiler (if one exists)
       // to tell it that compiling assets for this browser compiler has started.
-      await writer?.init(inputOptions);
+      if (channel.isActive) {
+        (writer ??= channel.getBundleWriter()).init(inputOptions);
+      }
       return COMMON_PLUGIN.options!.call(this, inputOptions);
     },
     async buildStart(inputOptions) {
