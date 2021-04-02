@@ -137,4 +137,4 @@ http
     _marko_template.render({}, res);
   })
   .listen();
-;var __MARKO_MANIFEST__=[[{"fileName":"src_3605.js","type":"chunk","name":"src_3605","imports":["marko/components","marko/dist/runtime/vdom/helpers/v-element","marko/dist/runtime/components/renderer","marko/dist/runtime/vdom","marko/dist/runtime/components/registry-browser","marko/dist/runtime/components/defineComponent"],"isEntry":true,"dynamicImports":[],"isDynamicEntry":false,"referencedFiles":[],"isImplicitEntry":false,"implicitlyLoadedBefore":[],"size":924},{"fileName":"src_3605.css","type":"asset","size":24}]];
+;var __MARKO_MANIFEST__=[[{"type":"chunk","fileName":"src_3605.js","name":"src_3605","imports":["marko/components","marko/dist/runtime/vdom/helpers/v-element","marko/dist/runtime/components/renderer","marko/dist/runtime/vdom","marko/dist/runtime/components/registry-browser","marko/dist/runtime/components/defineComponent"],"isEntry":true,"dynamicImports":[],"isDynamicEntry":false,"referencedFiles":[],"isImplicitEntry":false,"implicitlyLoadedBefore":[],"size":924},{"type":"asset","fileName":"src_3605.css","size":24}]];

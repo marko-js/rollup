@@ -9,11 +9,29 @@ import _initComponents from 'marko/dist/core-tags/components/init-components-tag
 import _awaitReorderer from 'marko/dist/core-tags/core/await/reorderer-renderer.js';
 import _preferredScriptLocation from 'marko/dist/core-tags/components/preferred-script-location-tag.js';
 
+const _marko_template$5 = t();
+const _marko_componentType$5 = "WqFPbUWt",
+      _marko_component$5 = {
+  onMount() {
+    console.log("mounted");
+  }
+
+};
+_marko_template$5._ = _marko_renderer(function (input, out, _component, component, state) {
+  out.w("<div id=class></div>");
+}, {
+  t: _marko_componentType$5
+}, _marko_component$5);
+
 const _marko_template$4 = t();
-const _marko_componentType$4 = "NeVrNy34",
+const _marko_componentType$4 = "ZBtzuG0J",
       _marko_component$4 = {};
 _marko_template$4._ = _marko_renderer(function (input, out, _component, component, state) {
-  out.w("<div id=implicit></div>");
+  out.w("<div id=implicit>");
+
+  _marko_tag(_marko_template$5, {}, out, _component, "1");
+
+  out.w("</div>");
 }, {
   t: _marko_componentType$4,
   i: true
@@ -46,7 +64,7 @@ _marko_template$3._ = _marko_renderer(function (input, out, _component, componen
 }, _marko_component$3);
 
 const _marko_template$2 = t();
-const _marko_componentType$2 = "GCNbBbzU",
+const _marko_componentType$2 = "8wwH/Tav",
       _marko_component$2 = {};
 _marko_template$2._ = _marko_renderer(function (input, out, _component, component, state) {
   out.w("<!DOCTYPE html><html lang=en><head>");
@@ -55,16 +73,11 @@ _marko_template$2._ = _marko_renderer(function (input, out, _component, componen
     "renderBody": (out, entry, chunks) => {
       const jsChunk = chunks.find(chunk => chunk.name === entry);
 
-      if (jsChunk.size) {
-
-        for (const fileName of jsChunk.imports) {
-          out.w(`<link rel=modulepreload${_marko_attr("href", `/static/${fileName}`)}>`);
-        }
-
-        out.w(`<script async type=module${_marko_attr("src", `/static/${jsChunk.fileName}`)}></script>`);
+      for (const fileName of jsChunk.imports) {
+        out.w(`<link rel=modulepreload${_marko_attr("href", `/static/${fileName}`)}>`);
       }
 
-      out.w(`<link rel=stylesheet${_marko_attr("href", `/static/${chunks.find(chunk => /\.css$/.test(chunk.fileName)).fileName}`)}>`);
+      out.w(`<script async type=module${_marko_attr("src", `/static/${jsChunk.fileName}`)}></script><link rel=stylesheet${_marko_attr("href", `/static/${chunks.find(chunk => /\.css$/.test(chunk.fileName)).fileName}`)}>`);
     }
   }, out, _component, "2");
 
@@ -85,7 +98,7 @@ _marko_template$2._ = _marko_renderer(function (input, out, _component, componen
 }, _marko_component$2);
 
 const _marko_template$1 = t();
-const _marko_componentType$1 = "PshIiYxe",
+const _marko_componentType$1 = "+OaeEE4l",
       _marko_component$1 = {};
 _marko_template$1._ = _marko_renderer(function (input, out, _component, component, state) {
   _marko_tag(_marko_template$2, {
@@ -103,11 +116,11 @@ _marko_template$1._ = _marko_renderer(function (input, out, _component, componen
 }, _marko_component$1);
 
 const _marko_template = t();
-const _marko_componentType = "PshIiYxe",
+const _marko_componentType = "+OaeEE4l",
       _marko_component = {};
 _marko_template._ = _marko_renderer(function (input, out, _component, component, state) {
   const $global = out.global;
-  ($global.__rollupEntries || ($global.__rollupEntries = [])).push("src_3ec8");
+  ($global.__rollupEntries || ($global.__rollupEntries = [])).push("src_f8e6");
 
   _marko_tag(_marko_template$1, input, out, _component, "0");
 
@@ -124,4 +137,4 @@ http
     _marko_template.render({}, res);
   })
   .listen();
-;var __MARKO_MANIFEST__=[[{"type":"chunk","fileName":"src_3ec8.js","name":"src_3ec8","imports":[],"isEntry":true,"dynamicImports":[],"isDynamicEntry":false,"referencedFiles":[],"isImplicitEntry":false,"implicitlyLoadedBefore":[],"size":0},{"type":"asset","fileName":"src_3ec8.css","size":24}]];
+;var __MARKO_MANIFEST__=[[{"name":"src_f8e6","type":"chunk","fileName":"src_f8e6.js"},{"type":"asset","fileName":"src_f8e6.css"}]];
