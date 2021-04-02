@@ -60,24 +60,14 @@ const COMMON_PLUGIN = {
    * from Marko's source.
    */
   options(inputOptions) {
-    const { onwarn } = inputOptions;
-    inputOptions.onwarn = (warning, warn) => {
-      if (
+    hideWarning(
+      inputOptions,
+      (warning) =>
         (warning.code === "CIRCULAR_DEPENDENCY" || warning.code === "EVAL") &&
         /\/marko\/(src|dist)\/runtime\//.test(
           warning.importer || warning.id || ""
         )
-      ) {
-        return;
-      }
-
-      if (onwarn) {
-        onwarn(warning, warn);
-      } else {
-        warn(warning);
-      }
-    };
-
+    );
     return inputOptions;
   },
   /**
@@ -210,14 +200,14 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
   let compiler: typeof Compiler;
   let wroteEmptyManifest = false;
   let registeredRollupTag: false | string = false;
-  const bundlesPerWriter: (rollup.OutputBundle | null)[][] = [];
+  const bundlesPerWriter: (SerializedChunks | null)[][] = [];
 
   // This code is a bit gnarly, but in essence what it does is allow
   // the server compiler to keep track of the number of browser compilers
   // and finally, once they are all done, inline the asset manifest into the
   // final server bundle.
   channel.getBundleWriter = () => {
-    const bundles: (rollup.OutputBundle | null)[] = [];
+    const bundles: (SerializedChunks | null)[] = [];
     bundlesPerWriter.push(bundles);
     return {
       async init(options: rollup.RollupOptions) {
@@ -238,7 +228,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
       },
       async write(bundle) {
         const nextBundleIndex = bundles.indexOf(null);
-        bundles[nextBundleIndex] = bundle;
+        bundles[nextBundleIndex] = serializeBundle(bundle);
         if (nextBundleIndex + 1 === bundles.length) {
           // This compiler is done, lets check the others.
           for (const curBundles of bundlesPerWriter) {
@@ -257,7 +247,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
           const manifest: SerializedChunks[] = [];
           for (const curBundles of bundlesPerWriter) {
             for (const curBundle of curBundles) {
-              manifest.push(serializeBundle(curBundle!));
+              manifest.push(curBundle!);
             }
           }
 
@@ -434,6 +424,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
   };
   let compiler: typeof Compiler;
   let writer: undefined | ReturnType<Channel["getBundleWriter"]>;
+  let currentServerEntries: { [x: string]: string };
 
   return {
     ...COMMON_PLUGIN,
@@ -444,6 +435,15 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
       if (channel.isActive) {
         (writer ??= channel.getBundleWriter()).init(inputOptions);
       }
+
+      hideWarning(inputOptions, (warning) =>
+        Boolean(
+          currentServerEntries &&
+            warning.code === "EMPTY_BUNDLE" &&
+            currentServerEntries[warning.chunkName!]
+        )
+      );
+
       return COMMON_PLUGIN.options!.call(this, inputOptions);
     },
     async buildStart(inputOptions) {
@@ -461,7 +461,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
         }
 
         try {
-          inputOptions.input = JSON.parse(
+          inputOptions.input = currentServerEntries = JSON.parse(
             await fs.promises.readFile(serverEntriesFile, "utf-8")
           );
         } catch (err) {
@@ -580,28 +580,27 @@ function serializeBundle(bundle: rollup.OutputBundle) {
   const chunks: SerializedChunks = [];
   for (const fileName in bundle) {
     const chunk = bundle[fileName];
-
-    if (chunk.type === "asset") {
-      chunks.push({
-        fileName,
-        type: "asset",
-        size: getSize(chunk.source),
-      } as SerializedAsset);
-    } else {
-      chunks.push({
-        fileName,
-        type: "chunk",
-        name: chunk.name,
-        imports: chunk.imports,
-        isEntry: chunk.isEntry,
-        dynamicImports: chunk.dynamicImports,
-        isDynamicEntry: chunk.isDynamicEntry,
-        referencedFiles: chunk.referencedFiles,
-        isImplicitEntry: chunk.isImplicitEntry,
-        implicitlyLoadedBefore: chunk.implicitlyLoadedBefore,
-        size: getSize(chunk.code),
-      } as SerializedChunk);
-    }
+    chunks.push(
+      chunk.type === "asset"
+        ? ({
+            fileName,
+            type: "asset",
+            size: getSize(chunk.source),
+          } as SerializedAsset)
+        : ({
+            fileName,
+            type: "chunk",
+            name: chunk.name,
+            imports: chunk.imports,
+            isEntry: chunk.isEntry,
+            dynamicImports: chunk.dynamicImports,
+            isDynamicEntry: chunk.isDynamicEntry,
+            referencedFiles: chunk.referencedFiles,
+            isImplicitEntry: chunk.isImplicitEntry,
+            implicitlyLoadedBefore: chunk.implicitlyLoadedBefore,
+            size: getSize(chunk.code),
+          } as SerializedChunk)
+    );
   }
   return chunks;
 }
@@ -620,6 +619,22 @@ function getSize(source: string | Uint8Array) {
       ? Buffer.byteLength(source.replace(/^\s+$/m, ""))
       : source.byteLength) || 0
   );
+}
+
+function hideWarning(
+  inputOptions: rollup.InputOptions,
+  shouldHide: (warning: rollup.RollupWarning) => boolean
+) {
+  const { onwarn } = inputOptions;
+  inputOptions.onwarn = (warning, warn) => {
+    if (!shouldHide(warning)) {
+      if (onwarn) {
+        onwarn(warning, warn);
+      } else {
+        warn(warning);
+      }
+    }
+  };
 }
 
 function isEmpty(obj: unknown) {
