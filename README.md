@@ -211,6 +211,35 @@ marko.server({ runtimeId });
 marko.browser({ runtimeId });
 ```
 
+### options.serialize
+
+This option is only available for the `browser` plugin. It allows you to transform the list of chunks serialzed in a [_linked config_](#linked-config) to include whatever you like.
+For example if you _did_ want to include the `code` property from the rollup chunk, to say inline some content, the following would work:
+
+```js
+marko.browser({
+  serialize(output) {
+    return output.map((chunk) =>
+      chunk.type === "asset"
+        ? {
+            type: "asset",
+            fileName: chunk.fileName,
+          }
+        : {
+            type: "chunk",
+            name: chunk.name,
+            isEntry: chunk.isEntry,
+            fileName: chunk.fileName,
+            code:
+              chunk.code.replace(/^\s+$/, "").length < 1024
+                ? chunk.code
+                : undefined, // only inline small code chunks
+          }
+    );
+  },
+});
+```
+
 ## Code of Conduct
 
 This project adheres to the [eBay Code of Conduct](./.github/CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.

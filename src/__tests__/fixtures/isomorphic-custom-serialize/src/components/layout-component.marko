@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <rollup|entry, chunks|>
+    $ const jsChunk = chunks.find(chunk => chunk.name === entry);
+    <for|fileName| of=jsChunk.imports>
+      <link rel="modulepreload" href=`/static/${fileName}`/>
+    </for>
+    <script async type="module" src=`/static/${jsChunk.fileName}`/>
+    <link rel="stylesheet" href=`/static/${chunks.find(chunk => /\.css$/.test(chunk.fileName)).fileName}`/>
+  </rollup>
+</head>
+<body>
+  <${input.renderBody}/>
+</body>
+</html>

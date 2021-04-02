@@ -7,7 +7,7 @@ import { createHash } from "crypto";
 import type * as Compiler from "@marko/compiler";
 import getServerEntryTemplate from "./server-entry-template";
 
-export interface Options {
+interface BaseOptions {
   // Override the Marko compiler instance being used. (primarily for tools wrapping this module)
   compiler?: string;
   // Sets a custom runtimeId to avoid conflicts with multiple copies of Marko on the same page.
@@ -18,12 +18,18 @@ export interface Options {
   babelConfig?: Compiler.Config["babelConfig"];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ServerOptions extends BaseOptions {}
+export interface BrowserOptions extends BaseOptions {
+  serialize?(chunks: (rollup.OutputChunk | rollup.OutputAsset)[]): unknown;
+}
+
 interface Channel {
   isActive: boolean;
   tempDir: Promise<string>;
   getBundleWriter(): {
     init(options: rollup.RollupOptions): Promise<void>;
-    write(bundle: rollup.OutputBundle): Promise<void>;
+    write(bundle: unknown): Promise<void>;
   };
 }
 
@@ -42,10 +48,9 @@ interface SerializedAsset extends rollup.OutputAsset {
   source: never;
 }
 
-type SerializedChunks = (SerializedChunk | SerializedAsset)[];
-
 interface InternalOptions extends ReturnType<typeof normalizeOpts> {
   channel: Channel;
+  serialize?: BrowserOptions["serialize"];
 }
 
 const VIRTUAL_FILES = new Map<string, { code: string; map?: unknown }>();
@@ -53,6 +58,7 @@ const PREFIX_REG = /^\0?marko-[^:]+:/;
 const BROWSER_ENTRY_PREFIX = "\0marko-browser-entry:";
 const SERVER_ENTRY_PREFIX = "\0marko-server-entry:";
 const RESOLVE_OPTS = { skipSelf: true };
+const PENDING_MARKER = {};
 
 const COMMON_PLUGIN = {
   /**
@@ -138,8 +144,8 @@ export default create();
  * built in the same process.
  */
 export function create(): {
-  server(opts?: Options): rollup.Plugin;
-  browser(opts?: Options): rollup.Plugin;
+  server(opts?: ServerOptions): rollup.Plugin;
+  browser(opts?: BrowserOptions): rollup.Plugin;
 } {
   // The channel is used when this linked browser/server plugin
   // has both the server and browser in use. It is used to communicate
@@ -162,7 +168,7 @@ export function create(): {
     /**
      * Create a Marko plugin for compiling server side Marko templates.
      */
-    server(opts?: Options) {
+    server(opts?: ServerOptions) {
       if (usingServer) {
         throw new Error(
           "@marko/rollup: You can only create one server compiler per linked instance. You must use the create() API otherwise."
@@ -178,9 +184,10 @@ export function create(): {
     /**
      * Create a Marko plugin for compiling client side Marko templates.
      */
-    browser(opts?: Options) {
+    browser(opts?: BrowserOptions) {
       const normalizedOpts = normalizeOpts("dom", opts) as InternalOptions;
       normalizedOpts.channel = channel;
+      normalizedOpts.serialize = opts?.serialize;
       usingBrowser = true;
       if (usingServer) initChannel();
       return browserPlugin(normalizedOpts);
@@ -200,14 +207,14 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
   let compiler: typeof Compiler;
   let wroteEmptyManifest = false;
   let registeredRollupTag: false | string = false;
-  const bundlesPerWriter: (SerializedChunks | null)[][] = [];
+  const bundlesPerWriter: unknown[][] = [];
 
   // This code is a bit gnarly, but in essence what it does is allow
   // the server compiler to keep track of the number of browser compilers
   // and finally, once they are all done, inline the asset manifest into the
   // final server bundle.
   channel.getBundleWriter = () => {
-    const bundles: (SerializedChunks | null)[] = [];
+    const bundles: unknown[] = [];
     bundlesPerWriter.push(bundles);
     return {
       async init(options: rollup.RollupOptions) {
@@ -216,7 +223,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
           : 1;
 
         for (let i = bundles.length; i--; ) {
-          bundles[i] = null;
+          bundles[i] = PENDING_MARKER;
         }
 
         if (isWatch && !wroteEmptyManifest) {
@@ -227,8 +234,8 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
         }
       },
       async write(bundle) {
-        const nextBundleIndex = bundles.indexOf(null);
-        bundles[nextBundleIndex] = serializeBundle(bundle);
+        const nextBundleIndex = bundles.indexOf(PENDING_MARKER);
+        bundles[nextBundleIndex] = bundle;
         if (nextBundleIndex + 1 === bundles.length) {
           // This compiler is done, lets check the others.
           for (const curBundles of bundlesPerWriter) {
@@ -237,17 +244,17 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
             }
 
             for (const curBundle of curBundles) {
-              if (curBundle === null) {
+              if (curBundle === PENDING_MARKER) {
                 return;
               }
             }
           }
 
           // ready to write manifest!
-          const manifest: SerializedChunks[] = [];
+          const manifest: unknown[] = [];
           for (const curBundles of bundlesPerWriter) {
             for (const curBundle of curBundles) {
-              manifest.push(curBundle!);
+              manifest.push(curBundle);
             }
           }
 
@@ -409,7 +416,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
 }
 
 function browserPlugin(opts: InternalOptions): rollup.Plugin {
-  const { channel } = opts;
+  const { channel, serialize = defaultSerialize } = opts;
   const markoConfig: Compiler.Config = {
     ...opts.markoConfig,
     resolveVirtualDependency(from, dep) {
@@ -518,20 +525,20 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
       if (!isWrite) {
         // This communicates back with the server compiler (if one exists)
         // to tell it that the assets for this browser compiler has completed.
-        await writer?.write(bundle);
+        await writer?.write(serialize(Object.values(bundle)));
       }
     },
     async writeBundle(_outputOptions, bundle) {
       // We prefer to do this in write mode since we want to wait until all
       // plugins have run.
-      await writer?.write(bundle);
+      await writer?.write(serialize(Object.values(bundle)));
     },
   };
 }
 
 function normalizeOpts(
   output: Compiler.Config["output"] | undefined,
-  opts: Options = {}
+  opts: BaseOptions = {}
 ) {
   return {
     compiler: import(opts.compiler || "@marko/compiler") as Promise<
@@ -576,33 +583,28 @@ function toEntryId(filename: string) {
  * that would be too large or pointless to include in the final
  * manifest.
  */
-function serializeBundle(bundle: rollup.OutputBundle) {
-  const chunks: SerializedChunks = [];
-  for (const fileName in bundle) {
-    const chunk = bundle[fileName];
-    chunks.push(
-      chunk.type === "asset"
-        ? ({
-            fileName,
-            type: "asset",
-            size: getSize(chunk.source),
-          } as SerializedAsset)
-        : ({
-            fileName,
-            type: "chunk",
-            name: chunk.name,
-            imports: chunk.imports,
-            isEntry: chunk.isEntry,
-            dynamicImports: chunk.dynamicImports,
-            isDynamicEntry: chunk.isDynamicEntry,
-            referencedFiles: chunk.referencedFiles,
-            isImplicitEntry: chunk.isImplicitEntry,
-            implicitlyLoadedBefore: chunk.implicitlyLoadedBefore,
-            size: getSize(chunk.code),
-          } as SerializedChunk)
-    );
-  }
-  return chunks;
+function defaultSerialize(chunks: (rollup.OutputChunk | rollup.OutputAsset)[]) {
+  return chunks.map((chunk) =>
+    chunk.type === "asset"
+      ? ({
+          type: "asset",
+          fileName: chunk.fileName,
+          size: getSize(chunk.source),
+        } as SerializedAsset)
+      : ({
+          type: "chunk",
+          fileName: chunk.fileName,
+          name: chunk.name,
+          imports: chunk.imports,
+          isEntry: chunk.isEntry,
+          dynamicImports: chunk.dynamicImports,
+          isDynamicEntry: chunk.isDynamicEntry,
+          referencedFiles: chunk.referencedFiles,
+          isImplicitEntry: chunk.isImplicitEntry,
+          implicitlyLoadedBefore: chunk.implicitlyLoadedBefore,
+          size: getSize(chunk.code),
+        } as SerializedChunk)
+  );
 }
 
 async function getServerEntriesFile(channel: Channel) {
