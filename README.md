@@ -108,7 +108,7 @@ In a [linked setup](#linked-config) you have access to the `<rollup>` tag which 
 The first parameter `entry` is the generated `input` name that the server plugin gave to the browser compiler.
 You can use it to find the corresponding entry chunk from rollups build.
 
-The second parameter `output` is an array of `AssetInfo | ChunkInfo` objects with most of the same properties returned from rollup's [`generateBundle` hook](https://rollupjs.org/guide/en/#generatebundle).
+The second parameter `output` is an array of `AssetInfo | ChunkInfo` objects with most of the same properties returned from rollup's [`generateBundle` hook](https://rollupjs.org/guide/en/#generatebundle). Some properties have been stripped, notably `code` and `map` since they would be too large to inline directly. A `size` property is also available for all chunks to allow you to be able to filter out empty chunks, or inline chunks of certain size.
 
 ```marko
 <head>

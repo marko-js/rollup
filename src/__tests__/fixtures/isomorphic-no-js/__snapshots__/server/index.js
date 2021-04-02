@@ -9,29 +9,11 @@ import _initComponents from 'marko/dist/core-tags/components/init-components-tag
 import _awaitReorderer from 'marko/dist/core-tags/core/await/reorderer-renderer.js';
 import _preferredScriptLocation from 'marko/dist/core-tags/components/preferred-script-location-tag.js';
 
-const _marko_template$5 = t();
-const _marko_componentType$5 = "1BSUdNzk",
-      _marko_component$5 = {
-  onMount() {
-    console.log("mounted");
-  }
-
-};
-_marko_template$5._ = _marko_renderer(function (input, out, _component, component, state) {
-  out.w("<div id=class></div>");
-}, {
-  t: _marko_componentType$5
-}, _marko_component$5);
-
 const _marko_template$4 = t();
-const _marko_componentType$4 = "9/pH0cjn",
+const _marko_componentType$4 = "NeVrNy34",
       _marko_component$4 = {};
 _marko_template$4._ = _marko_renderer(function (input, out, _component, component, state) {
-  out.w("<div id=implicit>");
-
-  _marko_tag(_marko_template$5, {}, out, _component, "1");
-
-  out.w("</div>");
+  out.w("<div id=implicit></div>");
 }, {
   t: _marko_componentType$4,
   i: true
@@ -64,7 +46,7 @@ _marko_template$3._ = _marko_renderer(function (input, out, _component, componen
 }, _marko_component$3);
 
 const _marko_template$2 = t();
-const _marko_componentType$2 = "EBjOWFdJ",
+const _marko_componentType$2 = "GCNbBbzU",
       _marko_component$2 = {};
 _marko_template$2._ = _marko_renderer(function (input, out, _component, component, state) {
   out.w("<!DOCTYPE html><html lang=en><head>");
@@ -73,11 +55,16 @@ _marko_template$2._ = _marko_renderer(function (input, out, _component, componen
     "renderBody": (out, entry, chunks) => {
       const jsChunk = chunks.find(chunk => chunk.name === entry);
 
-      for (const fileName of jsChunk.imports) {
-        out.w(`<link rel=modulepreload${_marko_attr("href", `/static/${fileName}`)}>`);
+      if (jsChunk.size) {
+
+        for (const fileName of jsChunk.imports) {
+          out.w(`<link rel=modulepreload${_marko_attr("href", `/static/${fileName}`)}>`);
+        }
+
+        out.w(`<script async type=module${_marko_attr("src", `/static/${jsChunk.fileName}`)}></script>`);
       }
 
-      out.w(`<script async type=module${_marko_attr("src", `/static/${jsChunk.fileName}`)}></script><link rel=stylesheet${_marko_attr("href", `/static/${chunks.find(chunk => /\.css$/.test(chunk.fileName)).fileName}`)}>`);
+      out.w(`<link rel=stylesheet${_marko_attr("href", `/static/${chunks.find(chunk => /\.css$/.test(chunk.fileName)).fileName}`)}>`);
     }
   }, out, _component, "2");
 
@@ -98,7 +85,7 @@ _marko_template$2._ = _marko_renderer(function (input, out, _component, componen
 }, _marko_component$2);
 
 const _marko_template$1 = t();
-const _marko_componentType$1 = "NgVTgNMO",
+const _marko_componentType$1 = "PshIiYxe",
       _marko_component$1 = {};
 _marko_template$1._ = _marko_renderer(function (input, out, _component, component, state) {
   _marko_tag(_marko_template$2, {
@@ -116,11 +103,11 @@ _marko_template$1._ = _marko_renderer(function (input, out, _component, componen
 }, _marko_component$1);
 
 const _marko_template = t();
-const _marko_componentType = "NgVTgNMO",
+const _marko_componentType = "PshIiYxe",
       _marko_component = {};
 _marko_template._ = _marko_renderer(function (input, out, _component, component, state) {
   const $global = out.global;
-  ($global.__rollupEntries || ($global.__rollupEntries = [])).push("src_3605");
+  ($global.__rollupEntries || ($global.__rollupEntries = [])).push("src_3ec8");
 
   _marko_tag(_marko_template$1, input, out, _component, "0");
 
@@ -137,4 +124,4 @@ http
     _marko_template.render({}, res);
   })
   .listen();
-;var __MARKO_MANIFEST__=[[{"fileName":"src_3605.js","type":"chunk","name":"src_3605","imports":["marko/components","marko/dist/runtime/vdom/helpers/v-element","marko/dist/runtime/components/renderer","marko/dist/runtime/vdom","marko/dist/runtime/components/registry-browser","marko/dist/runtime/components/defineComponent"],"isEntry":true,"dynamicImports":[],"isDynamicEntry":false,"referencedFiles":[],"isImplicitEntry":false,"implicitlyLoadedBefore":[],"size":924},{"fileName":"src_3605.css","type":"asset","size":24}]];
+;var __MARKO_MANIFEST__=[[{"fileName":"src_3ec8.js","type":"chunk","name":"src_3ec8","imports":[],"isEntry":true,"dynamicImports":[],"isDynamicEntry":false,"referencedFiles":[],"isImplicitEntry":false,"implicitlyLoadedBefore":[],"size":0},{"fileName":"src_3ec8.css","type":"asset","size":24}]];
