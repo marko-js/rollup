@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/marko-js/rollup/compare/v3.0.0...v3.1.0) (2021-04-08)
+
+
+### Features
+
+* add custom serialize option ([918d14b](https://github.com/marko-js/rollup/commit/918d14bf4a92b61a0bb19f7afa64fa38c33f8048))
+* expose size meta data for chunks ([7109aeb](https://github.com/marko-js/rollup/commit/7109aeb2ba27ba7f1a16e538ddd0d6ea20ee4d3f))
+* hide error message about empty entry chunks ([50b56fe](https://github.com/marko-js/rollup/commit/50b56feaccf9004f9ec0482eff834d0b125be949))
+
+
+### Bug Fixes
+
+* allow plugin invocations to happen out of order ([#9](https://github.com/marko-js/rollup/issues/9)) ([f19760b](https://github.com/marko-js/rollup/commit/f19760bc3a53fe65622b52b4c664b54bb277dad1))
+
 ## [3.0.0](https://github.com/marko-js/rollup/compare/v2.2.1...v3.0.0) (2021-03-27)
 
 
