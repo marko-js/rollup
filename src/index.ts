@@ -206,6 +206,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
   let isWatch = false;
   let compiler: typeof Compiler;
   let wroteEmptyManifest = false;
+  let hasNewServerEntries = true;
   let registeredRollupTag: false | string = false;
   const bundlesPerWriter: unknown[][] = [];
 
@@ -342,6 +343,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
           const fileName = id.slice(SERVER_ENTRY_PREFIX.length);
           const entryId = toEntryId(fileName);
           serverEntries[entryId] = fileName;
+          hasNewServerEntries = true;
           return getServerEntryTemplate({
             entryId,
             runtimeId: opts.markoConfig.runtimeId,
@@ -404,12 +406,15 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
           );
         }
 
-        // We write out all discovered server entries to a temp file
-        // which is read by the browser compilers.
-        await fs.promises.writeFile(
-          await getServerEntriesFile(channel),
-          JSON.stringify(serverEntries)
-        );
+        if (hasNewServerEntries) {
+          hasNewServerEntries = false;
+          // We write out all discovered server entries to a temp file
+          // which is read by the browser compilers.
+          await fs.promises.writeFile(
+            await getServerEntriesFile(channel),
+            JSON.stringify(serverEntries)
+          );
+        }
       }
     },
   };
