@@ -570,11 +570,23 @@ function isMarkoFile(file: string) {
 }
 
 function toEntryId(filename: string) {
-  return `${filename
-    .replace(/(\/(index|template)|)\..*$/, "")
-    .replace(/^.*\//, "")}_${createHash("MD5")
+  const lastSepIndex = filename.lastIndexOf(path.sep);
+  let name = filename.slice(
+    lastSepIndex + 1,
+    filename.indexOf(".", lastSepIndex)
+  );
+
+  if (name === "index" || name === "template") {
+    name = filename.slice(
+      filename.lastIndexOf(path.sep, lastSepIndex - 1) + 1,
+      lastSepIndex
+    );
+  }
+
+  return `${name}_${createHash("SHA1")
     .update(path.relative(process.cwd(), filename))
-    .digest("hex")
+    .digest("base64")
+    .replace(/[/+]/g, "-")
     .slice(0, 4)}`;
 }
 
