@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/marko-js/rollup/compare/v3.1.1...v3.2.0) (2021-04-28)
+
+
+### Features
+
+* avoid writing to server entries file unnecessarily ([d1cab4e](https://github.com/marko-js/rollup/commit/d1cab4e4426432a7768eea381087ce97c207fb87))
+
 ### [3.1.1](https://github.com/marko-js/rollup/compare/v3.1.0...v3.1.1) (2021-04-28)
 
 
