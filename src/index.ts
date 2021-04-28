@@ -29,7 +29,7 @@ interface Channel {
   tempDir: Promise<string>;
   getBundleWriter(): {
     init(options: rollup.RollupOptions): Promise<void>;
-    write(bundle: unknown): Promise<void>;
+    write(outputOptions: rollup.OutputOptions, bundle: unknown): Promise<void>;
   };
 }
 
@@ -216,12 +216,22 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
   // final server bundle.
   channel.getBundleWriter = () => {
     const bundles: unknown[] = [];
+    let outputIds: string[] | undefined;
+    let writtenBundles: number;
     bundlesPerWriter.push(bundles);
     return {
       async init(options: rollup.RollupOptions) {
-        bundles.length = Array.isArray(options.output)
-          ? options.output.length
-          : 1;
+        const outputs =
+          options.output &&
+          (Array.isArray(options.output) ? options.output : [options.output]);
+        if (outputs) {
+          outputIds = outputs.map(getOutputId);
+          bundles.length = outputs.length;
+        } else {
+          bundles.length = 1;
+        }
+
+        writtenBundles = 0;
 
         for (let i = bundles.length; i--; ) {
           bundles[i] = PENDING_MARKER;
@@ -234,10 +244,11 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
           await fs.promises.writeFile(await getManifestFile(channel), "");
         }
       },
-      async write(bundle) {
-        const nextBundleIndex = bundles.indexOf(PENDING_MARKER);
-        bundles[nextBundleIndex] = bundle;
-        if (nextBundleIndex + 1 === bundles.length) {
+      async write(outputOptions, bundle) {
+        bundles[
+          outputIds ? outputIds.indexOf(getOutputId(outputOptions)) : 0
+        ] = bundle;
+        if (++writtenBundles === bundles.length) {
           // This compiler is done, lets check the others.
           for (const curBundles of bundlesPerWriter) {
             if (curBundles === bundles) {
@@ -526,17 +537,17 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
 
       return { code, map };
     },
-    async generateBundle(_outputOptions, bundle, isWrite) {
+    async generateBundle(outputOptions, bundle, isWrite) {
       if (!isWrite) {
         // This communicates back with the server compiler (if one exists)
         // to tell it that the assets for this browser compiler has completed.
-        await writer?.write(serialize(Object.values(bundle)));
+        await writer?.write(outputOptions, serialize(Object.values(bundle)));
       }
     },
-    async writeBundle(_outputOptions, bundle) {
+    async writeBundle(outputOptions, bundle) {
       // We prefer to do this in write mode since we want to wait until all
       // plugins have run.
-      await writer?.write(serialize(Object.values(bundle)));
+      await writer?.write(outputOptions, serialize(Object.values(bundle)));
     },
   };
 }
@@ -638,6 +649,10 @@ function getSize(source: string | Uint8Array) {
       ? Buffer.byteLength(source.replace(/^\s+$/m, ""))
       : source.byteLength) || 0
   );
+}
+
+function getOutputId(outputOptions: rollup.OutputOptions) {
+  return (outputOptions.dir || outputOptions.file) as string;
 }
 
 function hideWarning(
