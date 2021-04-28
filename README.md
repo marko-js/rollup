@@ -14,8 +14,8 @@
     <img src="https://img.shields.io/badge/styled_with-prettier-ff69b4.svg" alt="Styled with prettier"/>
   </a>
   <!-- CI -->
-  <a href="https://travis-ci.org/marko-js/rollup">
-  <img src="https://img.shields.io/travis/marko-js/rollup.svg" alt="Build status"/>
+  <a href="https://github.com/marko-js/rollup/actions/workflows/ci.yml">
+    <img src="https://github.com/marko-js/rollup/actions/workflows/ci.yml/badge.svg" alt="Build status"/>
   </a>
   <!-- Coverage -->
   <a href="https://coveralls.io/github/marko-js/rollup">
