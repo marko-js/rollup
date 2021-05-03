@@ -353,8 +353,8 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
           // the browser compilers what to bundle.
           const fileName = id.slice(SERVER_ENTRY_PREFIX.length);
           const entryId = toEntryId(fileName);
+          hasNewServerEntries ||= serverEntries[entryId] !== fileName;
           serverEntries[entryId] = fileName;
-          hasNewServerEntries = true;
           return getServerEntryTemplate({
             entryId,
             runtimeId: opts.markoConfig.runtimeId,
