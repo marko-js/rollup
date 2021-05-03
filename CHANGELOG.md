@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.1](https://github.com/marko-js/rollup/compare/v3.2.0...v3.2.1) (2021-05-03)
+
+
+### Bug Fixes
+
+* reduce unecessary client bundle runs ([f512d51](https://github.com/marko-js/rollup/commit/f512d51a6d7c321376fb969d566f4b2a7add3ee4))
+
 ## [3.2.0](https://github.com/marko-js/rollup/compare/v3.1.1...v3.2.0) (2021-04-28)
 
 
