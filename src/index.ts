@@ -26,7 +26,13 @@ export interface BrowserOptions extends BaseOptions {
 
 interface Channel {
   isActive: boolean;
+  isWatchMode: boolean;
   tempDir: Promise<string>;
+  chunksNeedingManifest: {
+    dir: string;
+    chunk: rollup.OutputChunk;
+    isWrite: boolean;
+  }[];
   getBundleWriter(): {
     init(options: rollup.RollupOptions): Promise<void>;
     write(outputOptions: rollup.OutputOptions, bundle: unknown): Promise<void>;
@@ -152,10 +158,112 @@ export function create(): {
   // between the server compiler and browser compilers.
   // Primarily the server tells the browser compilers what the Marko entries are,
   // and the browser compilers tell the server what assets were generated.
-  const channel = { isActive: false } as Channel;
+  const bundlesPerWriter: unknown[][] = [];
+  let wroteEmptyManifest = false;
+  const channel = {
+    isActive: false,
+    isWatchMode: false,
+    getBundleWriter() {
+      const bundles: unknown[] = [];
+      let outputIds: string[] | undefined;
+      let writtenBundles: number;
+      bundlesPerWriter.push(bundles);
+      return {
+        async init(options: rollup.RollupOptions) {
+          const outputs =
+            options.output &&
+            (Array.isArray(options.output) ? options.output : [options.output]);
+          if (outputs) {
+            outputIds = outputs.map(getOutputId);
+            bundles.length = outputs.length;
+          } else {
+            bundles.length = 1;
+          }
+
+          writtenBundles = 0;
+
+          for (let i = bundles.length; i--; ) {
+            bundles[i] = PENDING_MARKER;
+          }
+
+          if (channel.isWatchMode && !wroteEmptyManifest) {
+            // By writing an empty manifest when we start, we signal to the bundled server
+            // that assets are pending for the browser compiler.
+            wroteEmptyManifest = true;
+            await fs.promises.writeFile(await getManifestFile(channel), "");
+          }
+        },
+        async write(outputOptions, bundle) {
+          bundles[
+            outputIds ? outputIds.indexOf(getOutputId(outputOptions)) : 0
+          ] = bundle;
+          if (++writtenBundles === bundles.length) {
+            // This compiler is done, lets check the others.
+            for (const curBundles of bundlesPerWriter) {
+              if (curBundles === bundles) {
+                continue;
+              }
+
+              for (const curBundle of curBundles) {
+                if (curBundle === PENDING_MARKER) {
+                  return;
+                }
+              }
+            }
+
+            // ready to write manifest!
+            const manifest: unknown[] = [];
+            for (const curBundles of bundlesPerWriter) {
+              for (const curBundle of curBundles) {
+                manifest.push(curBundle);
+              }
+            }
+
+            if (channel.isWatchMode) {
+              // In watch mode the manifest is written to a temp file
+              // which is then automatically watched via the `rollup-watch.marko` tag.
+              wroteEmptyManifest = false;
+              await fs.promises.writeFile(
+                await getManifestFile(channel),
+                JSON.stringify(manifest, null, 2)
+              );
+            } else {
+              // Otherwise we find which rollup chunks reference the <rollup> tag
+              // and inline the manifest at the bottom.
+              const manifestCode = `;var __MARKO_MANIFEST__=${JSON.stringify(
+                manifest
+              )};\n`;
+              const writes: Promise<unknown>[] = [];
+
+              while (channel.chunksNeedingManifest.length) {
+                const {
+                  dir,
+                  chunk,
+                  isWrite,
+                } = channel.chunksNeedingManifest.pop()!;
+                chunk.code += manifestCode;
+
+                if (isWrite) {
+                  writes.push(
+                    fs.promises.appendFile(
+                      path.join(dir, chunk.fileName),
+                      manifestCode
+                    )
+                  );
+                }
+              }
+
+              await Promise.all(writes);
+            }
+          }
+        },
+      };
+    },
+  } as Channel;
   const initChannel = () => {
     if (!channel.isActive) {
       channel.isActive = true;
+      channel.chunksNeedingManifest = [];
       channel.tempDir = fs.promises.mkdtemp(
         path.join(os.tmpdir(), "marko-rollup-")
       );
@@ -198,117 +306,16 @@ export function create(): {
 function serverPlugin(opts: InternalOptions): rollup.Plugin {
   const { channel } = opts;
   const serverEntries: { [x: string]: string } = {};
-  const chunksNeedingManifest: {
-    dir: string;
-    chunk: rollup.OutputChunk;
-    isWrite: boolean;
-  }[] = [];
   let isWatch = false;
   let compiler: typeof Compiler;
-  let wroteEmptyManifest = false;
   let hasNewServerEntries = true;
   let registeredRollupTag: false | string = false;
-  const bundlesPerWriter: unknown[][] = [];
-
-  // This code is a bit gnarly, but in essence what it does is allow
-  // the server compiler to keep track of the number of browser compilers
-  // and finally, once they are all done, inline the asset manifest into the
-  // final server bundle.
-  channel.getBundleWriter = () => {
-    const bundles: unknown[] = [];
-    let outputIds: string[] | undefined;
-    let writtenBundles: number;
-    bundlesPerWriter.push(bundles);
-    return {
-      async init(options: rollup.RollupOptions) {
-        const outputs =
-          options.output &&
-          (Array.isArray(options.output) ? options.output : [options.output]);
-        if (outputs) {
-          outputIds = outputs.map(getOutputId);
-          bundles.length = outputs.length;
-        } else {
-          bundles.length = 1;
-        }
-
-        writtenBundles = 0;
-
-        for (let i = bundles.length; i--; ) {
-          bundles[i] = PENDING_MARKER;
-        }
-
-        if (isWatch && !wroteEmptyManifest) {
-          // By writing an empty manifest when we start, we signal to the bundled server
-          // that assets are pending for the browser compiler.
-          wroteEmptyManifest = true;
-          await fs.promises.writeFile(await getManifestFile(channel), "");
-        }
-      },
-      async write(outputOptions, bundle) {
-        bundles[outputIds ? outputIds.indexOf(getOutputId(outputOptions)) : 0] =
-          bundle;
-        if (++writtenBundles === bundles.length) {
-          // This compiler is done, lets check the others.
-          for (const curBundles of bundlesPerWriter) {
-            if (curBundles === bundles) {
-              continue;
-            }
-
-            for (const curBundle of curBundles) {
-              if (curBundle === PENDING_MARKER) {
-                return;
-              }
-            }
-          }
-
-          // ready to write manifest!
-          const manifest: unknown[] = [];
-          for (const curBundles of bundlesPerWriter) {
-            for (const curBundle of curBundles) {
-              manifest.push(curBundle);
-            }
-          }
-
-          if (isWatch) {
-            // In watch mode the manifest is written to a temp file
-            // which is then automatically watched via the `rollup-watch.marko` tag.
-            wroteEmptyManifest = false;
-            await fs.promises.writeFile(
-              await getManifestFile(channel),
-              JSON.stringify(manifest, null, 2)
-            );
-          } else {
-            // Otherwise we find which rollup chunks reference the <rollup> tag
-            // and inline the manifest at the bottom.
-            const manifestStr = JSON.stringify(manifest);
-            const writes: Promise<unknown>[] = [];
-
-            while (chunksNeedingManifest.length) {
-              const { dir, chunk, isWrite } = chunksNeedingManifest.pop()!;
-              chunk.code += `;var __MARKO_MANIFEST__=${manifestStr};\n`;
-
-              if (isWrite) {
-                writes.push(
-                  fs.promises.writeFile(
-                    path.join(dir, chunk.fileName),
-                    chunk.code
-                  )
-                );
-              }
-            }
-
-            await Promise.all(writes);
-          }
-        }
-      },
-    };
-  };
   return {
     ...COMMON_PLUGIN,
     name: "marko/server",
     async buildStart() {
       compiler ??= await opts.compiler;
-      isWatch = this.meta.watchMode;
+      isWatch = channel.isWatchMode = this.meta.watchMode;
 
       if (!registeredRollupTag) {
         // Here we inject either the watchMode rollup tag, or the build one.
@@ -400,7 +407,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
                 if (!isWatch) {
                   // When in build mode, we keep track of the chunks referencing the rollup tag
                   // in order to inject the asset manifest later.
-                  chunksNeedingManifest.push({ dir, chunk, isWrite });
+                  channel.chunksNeedingManifest.push({ dir, chunk, isWrite });
                 }
 
                 hasRollupTag = true;
@@ -444,8 +451,8 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
     ...markoConfig,
     output: "hydrate",
   };
+  const writer = channel.getBundleWriter();
   let compiler: typeof Compiler;
-  let writer: undefined | ReturnType<Channel["getBundleWriter"]>;
   let currentServerEntries: { [x: string]: string };
   let serverEntriesFile: string;
 
@@ -456,7 +463,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
       // This communicates back with the server compiler (if one exists)
       // to tell it that compiling assets for this browser compiler has started.
       if (channel.isActive) {
-        (writer ??= channel.getBundleWriter()).init(inputOptions);
+        writer.init(inputOptions);
 
         // Here we load the temp file (created by the server compiler) with the
         // list of Marko files that need to be bundled.
