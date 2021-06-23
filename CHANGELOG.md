@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.3.0](https://github.com/marko-js/rollup/compare/v3.2.1...v3.3.0) (2021-06-23)
+
+
+### Features
+
+* allow other plugins to modify the browser input ([f6a3e03](https://github.com/marko-js/rollup/commit/f6a3e03a9c26dba0984a2f93f97f1e9fcd72d47c))
+
+
+### Bug Fixes
+
+* issue with assets not being inlined with multi config ([#22](https://github.com/marko-js/rollup/issues/22)) ([8f38818](https://github.com/marko-js/rollup/commit/8f38818dafa3e42599785a39a7777b6e7e6673f1))
+
 ### [3.2.1](https://github.com/marko-js/rollup/compare/v3.2.0...v3.2.1) (2021-05-03)
 
 
