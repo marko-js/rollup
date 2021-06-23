@@ -3,6 +3,7 @@ import path from "path";
 import * as rollup from "rollup";
 import css from "rollup-plugin-postcss";
 import { toMatchFile } from "jest-file-snapshot";
+import ".."; // Ensure jest watches changes to the plugin.
 
 const FIXTURES = path.join(__dirname, "fixtures");
 
