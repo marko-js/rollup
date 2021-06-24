@@ -164,7 +164,7 @@ export function create(): {
     isActive: false,
     isWatchMode: false,
     getBundleWriter() {
-      const bundles: unknown[] = [];
+      const bundles: unknown[] = [PENDING_MARKER];
       let outputIds: string[] | undefined;
       let writtenBundles: number;
       bundlesPerWriter.push(bundles);
