@@ -7,16 +7,18 @@ export default (opts: {
   const templatePathStr = JSON.stringify(opts.templatePath);
   return `import template from ${templatePathStr};
 export * from ${templatePathStr};
-$ const $global = out.global;
+$ const markoGlobal = out.global;
 ${
   opts.runtimeId
-    ? `$ $global.runtimeId = ${JSON.stringify(opts.runtimeId)};\n`
+    ? `$ markoGlobal.runtimeId = ${JSON.stringify(opts.runtimeId)};\n`
     : ""
 }${
     opts.manifestPath
-      ? `$ $global.__rollupManifest = ${JSON.stringify(opts.manifestPath)};\n`
+      ? `$ markoGlobal.__rollupManifest = ${JSON.stringify(
+          opts.manifestPath
+        )};\n`
       : ""
-  }$ ($global.__rollupEntries || ($global.__rollupEntries = [])).push(${JSON.stringify(
+  }$ (markoGlobal.__rollupEntries || (markoGlobal.__rollupEntries = [])).push(${JSON.stringify(
     opts.entryId
   )});
 

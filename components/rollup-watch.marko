@@ -1,27 +1,27 @@
 import fs from "fs";
 static let watcher;
 static let pendingManifest;
-static function getLatestManifest($global) {
+static function getLatestManifest(markoGlobal) {
   if (!watcher) {
-    watcher = fs.watch($global.__rollupManifest).on("change", () => {
+    watcher = fs.watch(markoGlobal.__rollupManifest).on("change", () => {
       pendingManifest = undefined
-      getLatestManifest($global);
+      getLatestManifest(markoGlobal);
     });
   }
 
   return pendingManifest || (pendingManifest = fs.promises
-    .readFile($global.__rollupManifest, "utf-8")
+    .readFile(markoGlobal.__rollupManifest, "utf-8")
     .then(JSON.parse)
     .catch(() =>
       new Promise(resolve => watcher.once("change", resolve))
-        .then(() => getLatestManifest($global))
+        .then(() => getLatestManifest(markoGlobal))
     ));
 }
 
-$ const $global = out.global;
-<await(getLatestManifest($global))>
+$ const markoGlobal = out.global;
+<await(getLatestManifest(markoGlobal))>
   <@then|manifest|>
-    $ const entries = $global.__rollupEntries || ($global.__rollupEntries = []);
+    $ const entries = markoGlobal.__rollupEntries || (markoGlobal.__rollupEntries = []);
     $ let writtenEntries = 0;
     <__flush_here_and_after__>
       $ const lastWrittenEntry = writtenEntries;

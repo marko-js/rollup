@@ -59,34 +59,20 @@ interface InternalOptions extends ReturnType<typeof normalizeOpts> {
   serialize?: BrowserOptions["serialize"];
 }
 
-const VIRTUAL_FILES = new Map<string, { code: string; map?: unknown }>();
+const VIRTUAL_FILES = new Map<string, { code: string; map?: any }>();
 const PREFIX_REG = /^\0?marko-[^:]+:/;
 const BROWSER_ENTRY_PREFIX = "\0marko-browser-entry:";
 const SERVER_ENTRY_PREFIX = "\0marko-server-entry:";
-const RESOLVE_OPTS = { skipSelf: true };
 const PENDING_MARKER = {};
 
 const COMMON_PLUGIN = {
   /**
-   * Hides warnings about circular dependencies and an eval (in dev mode I promise!)
-   * from Marko's source.
-   */
-  options(inputOptions) {
-    hideWarning(
-      inputOptions,
-      (warning) =>
-        (warning.code === "CIRCULAR_DEPENDENCY" || warning.code === "EVAL") &&
-        /\/marko\/(src|dist)\/runtime\//.test(
-          warning.importer || warning.id || ""
-        )
-    );
-    return inputOptions;
-  },
-  /**
    * Handles resolving our custom `marko-` prefix for entrypoints, as well
    * as our virtual files.
    */
-  async resolveId(importee: string, importer: string | undefined) {
+  async resolveId(importee, importer, importOpts) {
+    if (importOpts.custom?.isMarko) return null;
+
     const importerPrefixMatch = importer && PREFIX_REG.exec(importer);
     const importeePrefixMatch = PREFIX_REG.exec(importee);
     let importeePrefix = "";
@@ -104,18 +90,22 @@ const COMMON_PLUGIN = {
       const virtualFile = path.resolve(importer, "..", importee);
 
       if (VIRTUAL_FILES.has(virtualFile)) {
-        return { id: virtualFile } as rollup.ResolvedId;
+        return virtualFile;
       }
     }
 
     if (importeePrefixMatch || importerPrefixMatch) {
-      const resolved = await this.resolve(importee, importer, RESOLVE_OPTS);
+      const resolved = await this.resolve(importee, importer, {
+        ...importOpts,
+        custom: { isMarko: true },
+      });
 
       if (resolved) {
-        resolved.id = importeePrefix + resolved.id;
+        return {
+          ...resolved,
+          id: importeePrefix + resolved.id,
+        };
       }
-
-      return resolved;
     }
 
     return null;
@@ -140,7 +130,7 @@ const COMMON_PLUGIN = {
 
     return null;
   },
-} as Omit<rollup.Plugin, "name">;
+} satisfies Omit<rollup.Plugin, "name">;
 
 // Expose a linked browser/server plugin instance by default.
 export default create();
@@ -236,11 +226,8 @@ export function create(): {
               const writes: Promise<unknown>[] = [];
 
               while (channel.chunksNeedingManifest.length) {
-                const {
-                  dir,
-                  chunk,
-                  isWrite,
-                } = channel.chunksNeedingManifest.pop()!;
+                const { dir, chunk, isWrite } =
+                  channel.chunksNeedingManifest.pop()!;
                 chunk.code += manifestCode;
 
                 if (isWrite) {
@@ -371,7 +358,7 @@ function serverPlugin(opts: InternalOptions): rollup.Plugin {
         }
       }
 
-      return COMMON_PLUGIN.load!.call(this, id);
+      return COMMON_PLUGIN.load.call(this, id);
     },
     async transform(source, id) {
       if (!isMarkoFile(id)) {
@@ -496,11 +483,11 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
         Boolean(
           currentServerEntries &&
             warning.code === "EMPTY_BUNDLE" &&
-            currentServerEntries[warning.chunkName!]
+            currentServerEntries[(warning as any).chunkName || warning.id!]
         )
       );
 
-      return COMMON_PLUGIN.options!.call(this, inputOptions);
+      return inputOptions;
     },
     async buildStart() {
       compiler ??= await opts.compiler;
@@ -512,7 +499,7 @@ function browserPlugin(opts: InternalOptions): rollup.Plugin {
       // as the rollup `input` option. These top level Marko files are compiled
       // to include only the necessary code to "hydrate" the component in the browser.
       // This code prefixes those `.marko` files with a marker to know to treat it differently.
-      return COMMON_PLUGIN.resolveId!.call(
+      return COMMON_PLUGIN.resolveId.call(
         this,
         (!importer && isMarkoFile(importee) ? BROWSER_ENTRY_PREFIX : "") +
           importee,
