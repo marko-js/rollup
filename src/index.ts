@@ -5,7 +5,6 @@ import { Buffer } from "buffer";
 import * as rollup from "rollup";
 import { createHash } from "crypto";
 import type * as Compiler from "@marko/compiler";
-import getServerEntryTemplate from "./server-entry-template";
 
 interface BaseOptions {
   // Override the Marko compiler instance being used. (primarily for tools wrapping this module)
@@ -672,4 +671,34 @@ function isEmpty(obj: unknown) {
   }
 
   return true;
+}
+
+function getServerEntryTemplate(opts: {
+  runtimeId?: string | null;
+  manifestPath: string | false;
+  templatePath: string;
+  entryId: string;
+}): string {
+  const templatePathStr = JSON.stringify(opts.templatePath);
+  return `import template from ${templatePathStr};
+export * from ${templatePathStr};
+$ const markoGlobal = out.global;
+${
+  opts.runtimeId
+    ? `$ markoGlobal.runtimeId = ${JSON.stringify(opts.runtimeId)};\n`
+    : ""
+}${
+    opts.manifestPath
+      ? `$ markoGlobal.__rollupManifest = ${JSON.stringify(
+          opts.manifestPath
+        )};\n`
+      : ""
+  }$ (markoGlobal.__rollupEntries || (markoGlobal.__rollupEntries = [])).push(${JSON.stringify(
+    opts.entryId
+  )});
+
+<\${template} ...input/>
+<init-components/>
+<await-reorderer/>
+`;
 }
