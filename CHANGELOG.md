@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.1](https://github.com/marko-js/rollup/compare/v4.0.0...v4.0.1) (2023-05-19)
+
+
+### Bug Fixes
+
+* esm issue with duplicated import ([9acf312](https://github.com/marko-js/rollup/commit/9acf312b37f60875e798ca4a44da90ee0fbd5d9f))
+
 ## [4.0.0](https://github.com/marko-js/rollup/compare/v3.3.1...v4.0.0) (2023-05-19)
 
 
