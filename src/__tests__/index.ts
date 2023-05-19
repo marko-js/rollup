@@ -45,7 +45,7 @@ fs.readdirSync(FIXTURES).forEach((fixture) => {
           typeof config.input === "string"
             ? path.join(dir, config.input)
             : undefined,
-        plugins: [css({ extract: true }), ...(config.plugins || [])],
+        plugins: [css({ extract: true })].concat((config.plugins as any) || []),
       });
 
       return await bundle.generate({ dir });

@@ -1,4 +1,4 @@
-import { register, init } from 'marko/components';
+import { register, init } from 'marko/dist/runtime/components/index.js';
 
 var component_0 = {
   onMount() {
