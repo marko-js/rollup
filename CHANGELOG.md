@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [4.0.0](https://github.com/marko-js/rollup/compare/v3.3.1...v4.0.0) (2023-05-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop support for node < 16
+
+* chore: resolve ts errors
+
+* fix: inline correct __dirname code for esm
+
+### Features
+
+* support rollup 3 ([#38](https://github.com/marko-js/rollup/issues/38)) ([634f42d](https://github.com/marko-js/rollup/commit/634f42d74d758b3618d863560d300175ce13ea36))
+
 ### [3.3.1](https://github.com/marko-js/rollup/compare/v3.3.0...v3.3.1) (2021-06-24)
 
 
