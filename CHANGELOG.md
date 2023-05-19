@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.3](https://github.com/marko-js/rollup/compare/v4.0.2...v4.0.3) (2023-05-19)
+
+
+### Bug Fixes
+
+* add missing exports for rollup.marko files ([680bf6e](https://github.com/marko-js/rollup/commit/680bf6ef8bbcbb660df99d2fc6a24098688b2ad9))
+
 ### [4.0.2](https://github.com/marko-js/rollup/compare/v4.0.1...v4.0.2) (2023-05-19)
 
 
