@@ -68,7 +68,7 @@
     "url": "https://github.com/marko-js/rollup"
   },
   "scripts": {
-    "build": "tsc -b && echo '{\"type\":\"module\"}' > dist/esm/package.json",
+    "build": "tsc -b && node prepend-file-vars.mjs && echo '{\"type\":\"module\"}' > dist/esm/package.json",
     "ci:report": "codecov",
     "ci:test": "jest --ci --coverage",
     "format": "npm run lint:eslint -- --fix && npm run lint:prettier -- --write && (fixpack || true)",
