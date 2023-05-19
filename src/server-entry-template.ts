@@ -1,5 +1,5 @@
 export default (opts: {
-  runtimeId?: string;
+  runtimeId?: string | null;
   manifestPath: string | false;
   templatePath: string;
   entryId: string;
