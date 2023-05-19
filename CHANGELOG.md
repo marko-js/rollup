@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [4.0.2](https://github.com/marko-js/rollup/compare/v4.0.1...v4.0.2) (2023-05-19)
+
+
+### Bug Fixes
+
+* inline server-entry-template code to fix esm mode ([d6dbbff](https://github.com/marko-js/rollup/commit/d6dbbff50063f8b92f4193c1f6f57c7533d64d1a))
+
 ### [4.0.1](https://github.com/marko-js/rollup/compare/v4.0.0...v4.0.1) (2023-05-19)
 
 
