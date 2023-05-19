@@ -40,7 +40,9 @@
     ".": {
       "import": "./dist/esm/index.js",
       "default": "./dist/cjs/index.js"
-    }
+    },
+    "./components/rollup-watch.marko": "./components/rollup-watch.marko",
+    "./components/rollup.marko": "./components/rollup.marko"
   },
   "files": [
     "marko.json",
